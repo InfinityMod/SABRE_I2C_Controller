@@ -1,0 +1,2 @@
+flexx
+smbus2
