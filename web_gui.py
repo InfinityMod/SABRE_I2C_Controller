@@ -227,4 +227,4 @@ if __name__ == "__main__":
     # app.launch("app", title="ES9038Control")  # to run as a desktop app
     app.create_server(host="", port=5000, backend="tornado")
     flx_app.launch("browser")  # to open in the browser
-    flx.run()  # mainloop will exit when the
+    flx.start()  # mainloop will exit when the
