@@ -54,7 +54,7 @@ python3 ./web_gui.py
 Open your browser and navigate to: http://device_ip:5000/ControlApp/
 
 
-## How should it look like
+## What it looks like
 ![Control Interface Preview](doc/images/Control_Interface.jpg "Web GUI")
 
 
