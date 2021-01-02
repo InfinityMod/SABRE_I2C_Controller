@@ -62,16 +62,53 @@ class TreeWithControls(flx.TreeWidget):
         for c in self.get_all_items():
             c.dispose()
 
+class FileInput(flx.LineEdit):
+
+    def _create_dom(self):
+        global document, FileReader
+        node = super()._create_dom()
+        self.file = document.createElement('input')
+        self.file.type = 'file'
+        self.file.style = 'display: none'
+        self.file.addEventListener('change', self._handle_file)
+        node.appendChild(self.file)
+        self.reader = FileReader()
+        self.reader.onload = self.file_loaded
+        return node
+
+
+    def _handle_file(self):
+        self.node.value = self.file.files[0].name
+        self.file_selected()
+
+
+    def select_file(self):
+        self.file.click()
+
+
+    def load(self):
+        if self.file.files.length > 0:
+            self.reader.readAsText(self.file.files[0])
+
+
+    @flx.emitter
+    def file_loaded(self, event):
+        return { 'filedata': event.target.result }
+
+
+    @flx.emitter
+    def file_selected(self):
+        return { 'filename': self.node.value }
 
 class WebFrontend(app.JsComponent):
     def init(self, py):
         self.py = py
+        self.file_name = flx.StringProp('')
+        self.file_input = FileInput()
         with flx.VBox():
             flx.Label(style="background:#cfc;", wrap=1, text="")
             with flx.HSplit(flex=1):
-                with flx.VBox(
-                    style="border:1px solid #777;",
-                ):
+                with flx.VBox(style="border:1px solid #777;",):
                     flx.Label(text="Properties Tree")
                     self.tree = TreeWithControls(py, flex=1, max_selected=1)
                 with flx.VBox(style="border:1px solid #777;"):
@@ -80,6 +117,8 @@ class WebFrontend(app.JsComponent):
                         with flx.VBox(flex=1, style=""):
                             self.combo = ui.ComboBox(editable=True, options=())
                             self.field = ui.LineEdit(placeholder_text="type here")
+                            self.pick_file = ui.Button(text='...')
+                            self.do_upload = ui.Button(text='Upload', disabled=True)
                         with flx.VBox(flex=5):
                             flx.Label(text="Info", style="")
                             self.info = flx.Label(
@@ -92,6 +131,34 @@ class WebFrontend(app.JsComponent):
                         )
             self.update_btn = ui.Button(text="Update", style="width: 100px;")
 
+    #FileUpload
+    @flx.reaction('file_input.file_selected')
+    def handle_file_selected(self, *events):
+        self.set_file_to_upload(events[-1]['filename'])
+        
+    @flx.reaction('file_input.file_loaded')
+    def handle_file_loaded(self, *events):
+        self.file_loaded(events[-1]['filedata'])
+
+    @flx.reaction('pick_file.pointer_click')
+    def on_pick_file(self, *events):
+        self.file_input.select_file()
+
+    @flx.reaction('do_upload.pointer_click')
+    def on_do_upload(self, *events):
+        self.file_input.load()
+
+    @flx.action
+    def set_file_to_upload(self, value):
+        self.do_upload._mutate_disabled(value == '')
+        self._mutate_file_name(value)
+        pass
+
+    @flx.emitter
+    def file_loaded(self, data):
+        return {'filedata': data }
+
+    #Others
     @event.action
     def update_combo(self, options, active_idx):
         if len(options) > 0:
@@ -219,10 +286,11 @@ if __name__ == "__main__":
     lock_settings = [("Mixing, Serial Data and Automute Configuration", "*")]
     mappers = [DAC_9038Q2M_Control(0x48), DAC_9038Q2M_Control(0x49)]
     for m in mappers:
-        m.i2c_init()
-        # m.data_init(
-        #     r"/env/nfs/dataServer/Private_Data/Projects/Hobbies/HIFI-Zuhause/DAC/Tuning/SABER_Controller/save.p"
-        # )
+        # m.i2c_init()
+        m.importYaml(
+            r"C:\Users\webco\Documents\Projects\SABRE_I2C_Controller\configs\device_0x48_config_std.yml"
+        )
+        pass
     flx_app = flx.App(ControlApp, mappers, lock_settings)
     # app.launch("app", title="ES9038Control")  # to run as a desktop app
     app.create_server(host="", port=5000, backend="tornado")

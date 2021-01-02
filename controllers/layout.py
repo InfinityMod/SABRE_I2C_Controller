@@ -192,6 +192,9 @@ class I2CMapper:
                     Bin(rawStream[r[2]]).applyData(r[0], r[1] + 1, data)
                 )
 
+        def containsRegister(self, registerID):
+            return (self.range[2] == registerID)
+
     class registerMultiRange:
         def __init__(self, start, stop, registerID=0, registerLen=8):
             self.ranges = []
@@ -244,6 +247,9 @@ class I2CMapper:
                 )
                 offset += r[1] - r[0] + 1
 
+        def containsRegister(self, registerID):
+            return any([r[2] == registerID for r in self.ranges])
+
     class register:
         def __init__(self, registers, name, writeable=True, registerLen=8):
             self.registers = (
@@ -253,7 +259,7 @@ class I2CMapper:
             self.registerLen = registerLen
             self.mnemonics = []
             self.name = name
-            self.rawData = {}
+            self.rawData = {r:0 for r in (registers if isinstance(registers, tuple) else [registers])}
             self.updateRanges = []
             self.initOver = True
 

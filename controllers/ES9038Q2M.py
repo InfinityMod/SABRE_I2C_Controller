@@ -939,8 +939,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "coeff_stage",
                     {
-                        "select stage 1": Bin(0),
-                        "select stage 2": Bin(1),
+                        "stage 1": Bin(0),
+                        "stage 2": Bin(1),
                     },
                     description="Selects which stage of the filter to write.",
                 ),
@@ -1225,6 +1225,26 @@ class DAC_9038Q2M_Control(I2CMapper):
         for register in self.registers:
             print(str(register) + "\n")
 
+    def fir_update(self, data, filter="fir1"):
+        if filter == "fir1":
+            assert(len(data) == 128)
+            self.get("Programmable FIR RAM Address").coeff_stage = "stage one"
+            self.i2c_update()
+            for i, d in enumerate(data):
+                self.get("Programmable FIR RAM Address").coeff_addr = i
+                self.i2c_update()
+                self.get("Programmable FIR RAM Data").prog_coeff_data = d
+                self.i2c_update()
+        elif filter == "fir2":
+            assert(len(data) == 28 or len(data) == 14)
+            self.get("Programmable FIR RAM Address").coeff_stage = "stage two"
+            self.i2c_update()
+            for i, d in enumerate(data[:14]):
+                self.get("Programmable FIR RAM Address").coeff_addr = i
+                self.i2c_update()
+                self.get("Programmable FIR RAM Data").prog_coeff_data = d
+                self.i2c_update()
+        
     def i2c_update(self):
         with SMBus(bus=1, force=True) as bus:
             for register in self.registers:
