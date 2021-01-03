@@ -1218,7 +1218,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 # Returned value is a list of 16 bytes
                 register.fillData(
                     {
-                        r: Bin(bus.read_byte_data(self.i2cAddr, r))
+                        r: bus.read_byte_data(self.i2cAddr, r)
                         for r in register.registers
                     }
                 )
