@@ -1,0 +1,14 @@
+[Unit]
+Description=Sabre ES9038 Control
+Documentation=Sabre ES9038 Control
+After=network.target syslog.target
+
+[Service]
+# see man systemd.service 
+Type=simple
+ExecStart=/usr/bin/python3 /home/pi/config/DAC/Control/web_gui.py
+ExecStop=ps -ef | grep 'Control/web_gui.py' | grep -v grep | awk '{print $2}' | xargs -r kill -9
+StandardOutput=journal
+
+[Install]
+WantedBy=multi-user.target 
