@@ -321,11 +321,11 @@ if __name__ == "__main__":
     lock_settings = [("Mixing, Serial Data and Automute Configuration", "*")]
     mappers = [DAC_9038Q2M_Control(0x48), DAC_9038Q2M_Control(0x49)]
     for m in mappers:
-        # m.i2c_init()
-        m.importYaml(
-            r"C:\Users\webco\Documents\Projects\SABRE_I2C_Controller\configs\device_0x48_config_std.yml"
-        )
-        pass
+        m.i2c_init()
+        # m.importYaml(
+        #     r"C:\Users\webco\Documents\Projects\SABRE_I2C_Controller\configs\device_0x48_config_std.yml"
+        # )
+        # pass
     flx_app = flx.App(ControlApp, mappers, lock_settings)
     # app.launch("app", title="ES9038Control")  # to run as a desktop app
     app.create_server(host="", port=5000, backend="tornado")
