@@ -63,44 +63,42 @@ class TreeWithControls(flx.TreeWidget):
             c.dispose()
 
 class FileInput(flx.LineEdit):
-
     def _create_dom(self):
         global document, FileReader
-        node = super()._create_dom()
+    
         self.file = document.createElement('input')
         self.file.type = 'file'
         self.file.style = 'display: none'
         self.file.addEventListener('change', self._handle_file)
+
+        node = super()._create_dom()
         node.appendChild(self.file)
+        node.style = 'display: none'
+
         self.reader = FileReader()
         self.reader.onload = self.file_loaded
         return node
-
 
     def _handle_file(self):
         self.node.value = self.file.files[0].name
         self.file_selected()
 
-
     def select_file(self):
         self.file.click()
-
 
     def load(self):
         if self.file.files.length > 0:
             self.reader.readAsText(self.file.files[0])
 
-
     @flx.emitter
     def file_loaded(self, event):
         return { 'filedata': event.target.result }
-
 
     @flx.emitter
     def file_selected(self):
         return { 'filename': self.node.value }
 
-class WebFrontend(app.JsComponent):
+class WebFrontend(flx.Widget):
     def init(self, py):
         self.py = py
         self.file_name = flx.StringProp('')
@@ -117,8 +115,9 @@ class WebFrontend(app.JsComponent):
                         with flx.VBox(flex=1, style=""):
                             self.combo = ui.ComboBox(editable=True, options=())
                             self.field = ui.LineEdit(placeholder_text="type here")
-                            self.pick_file = ui.Button(text='...')
-                            self.do_upload = ui.Button(text='Upload', disabled=True)
+                            with flx.HBox(flex=1, style="max-height: 20px;"):
+                                self.pick_file = ui.Button(text='...')
+                                self.do_upload = ui.Button(text='Upload', disabled=True)
                         with flx.VBox(flex=5):
                             flx.Label(text="Info", style="")
                             self.info = flx.Label(
@@ -129,9 +128,8 @@ class WebFrontend(app.JsComponent):
                         self.rawLabel = flx.Label(
                             text="", style="white-space: pre-line;"
                         )
-            self.update_btn = ui.Button(text="Update", style="width: 100px;")
+            self.update_btn = ui.Button(text="Apply", style="width: 100px;")
 
-    #FileUpload
     @flx.reaction('file_input.file_selected')
     def handle_file_selected(self, *events):
         self.set_file_to_upload(events[-1]['filename'])
@@ -151,7 +149,7 @@ class WebFrontend(app.JsComponent):
     @flx.action
     def set_file_to_upload(self, value):
         self.do_upload._mutate_disabled(value == '')
-        self._mutate_file_name(value)
+        # self._mutate_file_name(value)
         pass
 
     @flx.emitter
@@ -159,17 +157,38 @@ class WebFrontend(app.JsComponent):
         return {'filedata': data }
 
     #Others
+    def field_visibility(self, status):
+        if status == False:
+            self.field.apply_style("display: none;")
+        else:
+            self.field.apply_style("display: inline-block;")
+
+    def combo_visibility(self, status):
+        if status == False:
+            self.combo.apply_style("display:none;")
+        else:
+            self.combo.apply_style("display: inline-block;")
+
+    @event.action
+    def upload_visibility(self, status):
+        if status == False:
+            self.pick_file.apply_style("display: none;")
+            self.do_upload.apply_style("display: none;")
+        else:
+            self.pick_file.apply_style("display: inline-block;")
+            self.do_upload.apply_style("display: inline-block;")
+
     @event.action
     def update_combo(self, options, active_idx):
         if len(options) > 0:
-            self.field.apply_style("display:none;")
+            self.field_visibility(False)
             self.combo.set_options(options)
             self.combo.set_selected_index(active_idx)
-            self.combo.apply_style("display: inline-block;")
+            self.combo_visibility(True)
         else:
-            self.combo.apply_style("display:none;")
+            self.combo_visibility(False)
             self.field.set_text(str(active_idx))
-            self.field.apply_style("display: inline-block;")
+            self.field_visibility(True)
 
     @event.action
     def update_raw(self, text):
@@ -230,6 +249,13 @@ class ControlApp(app.PyComponent):
             }
         )
         self.currentSelect = None
+        self.fir_filter = "fir0"
+    
+    @flx.reaction('widget.file_loaded')
+    def handle_file_upload(self, *events):
+        filedata = events[-1]['filedata']
+        data = [int(min(1.0, max(-1.0, float(f.replace("\r", ""))))/(1.0/2**24)) for f in filedata.split("\n") if len(f) > 0]
+        m.fir_update(data, filter=self.fir_filter)
 
     @event.action
     def on_tree_select(self, data):
@@ -241,14 +267,21 @@ class ControlApp(app.PyComponent):
         mnemonic = register.get(select[1])
         self.currentSelect = select
 
-        self.widget.update_combo(
-            mnemonic.possible_values,
-            mnemonic.possible_values.index(mnemonic.value)
-            if len(mnemonic.possible_values) > 0
-            else mnemonic.value,
-        )
-        self.widget.update_info(mnemonic.description)
-        self.widget.update_raw(str(register))
+        if self.currentSelect[1] == "prog_coeff_data":
+            self.widget.upload_visibility(True)
+            self.widget.update_info(mnemonic.description)
+            self.widget.update_combo(["fir1", "fir2"], None)
+            self.widget.update_raw(str(register))
+        else:
+            self.widget.upload_visibility(False)
+            self.widget.update_combo(
+                mnemonic.possible_values,
+                mnemonic.possible_values.index(mnemonic.value)
+                if len(mnemonic.possible_values) > 0
+                else mnemonic.value,
+            )
+            self.widget.update_info(mnemonic.description)
+            self.widget.update_raw(str(register))
 
     @event.action
     def on_dropdown_change(self, data):
@@ -257,7 +290,9 @@ class ControlApp(app.PyComponent):
                 (self.currentSelect[0], "*") not in self.locked
             ):
                 mnemonic = m.get(self.currentSelect[0]).get(self.currentSelect[1])
-                if len(mnemonic.possible_values) > 0:
+                if mnemonic.name == "prog_coeff_data":
+                    self.fir_filter = data[0]["key"]
+                elif len(mnemonic.possible_values) > 0:
                     setattr(
                         m.get(self.currentSelect[0]),
                         self.currentSelect[1],
