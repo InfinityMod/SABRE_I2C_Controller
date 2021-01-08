@@ -311,7 +311,7 @@ reg_26:
     reserved:
       possible_values: []
       value: Reserved
-  name: Reserved
+  name: Reserved 26
   rawData:
     26: '01100010'
   registerLen: 8
@@ -353,7 +353,7 @@ reg_28:
     reserved:
       possible_values: []
       value: Reserved
-  name: Reserved
+  name: Reserved 28
   rawData:
     28: '11110000'
   registerLen: 8
@@ -428,7 +428,7 @@ reg_32:
     reserved:
       possible_values: []
       value: Reserved
-  name: Reserved
+  name: Reserved 32
   rawData:
     32: '00000000'
   registerLen: 8
@@ -471,7 +471,7 @@ reg_38:
     reserved:
       possible_values: []
       value: Reserved
-  name: Reserved
+  name: Reserved 38
   rawData:
     38: '00000000'
   registerLen: 8
@@ -662,7 +662,7 @@ reg_53_54:
     reserved:
       possible_values: []
       value: Reserved
-  name: Reserved
+  name: Reserved 53/54
   rawData:
     53: '00011010'
     54: '00001111'
@@ -858,7 +858,7 @@ reg_9:
     reserved:
       possible_values: []
       value: Reserved
-  name: Reserved
+  name: Reserved 9
   rawData:
     9: '00100010'
   registerLen: 8

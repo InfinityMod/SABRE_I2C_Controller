@@ -1,89 +1,131 @@
 from __future__ import annotations
 import math, pickle, yaml
 from typing import Union
+from bitstring import BitArray
 
 
 class Bin(object):
-    def __init__(self, num, registerLen=8, joinDirection="left", idxBegin="right"):
+    def __init__(self, num, registerLen=8, joinDirection="left", idxBegin="right", mode="unsigned"):
         self.registerLen = registerLen
         self.joinDirection = joinDirection
         self.idxBegin = idxBegin
+        self.mode = mode
+        
+        args = {}
         if isinstance(num, int):
-            self.value = ("{0:0" + str(registerLen) + "b}").format(num)
+            if mode == "signed":
+                args["int"] = num
+            elif mode == "unsigned":
+                args["uint"] = num
+            args["length"] = registerLen
+            self.value: BitArray = BitArray(**args)
+        elif isinstance(num, BitArray):
+            self.value: BitArray = BitArray(uint = 0, length = registerLen)
+            self[0:num.length] = num
+        elif isinstance(num, Bin):
+            self.value: BitArray = BitArray(uint=0, length = registerLen)
+            self[0:num.value.length] = num.value
+        elif isinstance(num, str):
+            self.value: BitArray = BitArray(bin=num)
         else:
-            self.value = num
+            raise("Wrong data type")
 
     def join(self, bin2):
-        n1 = self.value
+        n1 = self.value.copy()
         n2 = bin2.value
+        
         if self.joinDirection == "left":
+            n1.prepend(n2)
             return Bin(
-                "{0}{1}".format(n2, n1),
-                registerLen=self.registerLen,
+                n1,
+                registerLen=n1.length,
                 joinDirection=self.joinDirection,
                 idxBegin=self.idxBegin,
             )
         else:
+            n1.append(n2)
             return Bin(
-                "{0}{1}".format(n1, n2),
-                registerLen=self.registerLen,
+                n1,
+                registerLen=n1.length,
                 joinDirection=self.joinDirection,
                 idxBegin=self.idxBegin,
             )
 
     def readRange(self, start: int, stop: int):
         reverse = False
+        _var = self.value.copy()
         if start > stop:
             start, stop = stop, start
             reverse = True
         if self.idxBegin == "right":
-            _var = self.value[::-1][start:stop]
+            _var.reverse()
+            _var = _var[start:stop]
             reverse = not reverse
         elif self.idxBegin == "left":
             _var = self.value[start:stop]
-        _var = _var[::-1] if reverse else _var
+        if reverse:
+            _var.reverse() 
         return Bin(
             _var,
-            registerLen=self.registerLen,
+            registerLen=_var.length,
             joinDirection=self.joinDirection,
             idxBegin=self.idxBegin,
         )
 
-    def applyData(self, start: int, stop: int, data: Bin):
-        reverse = False
-        _len = stop - start
+    def applyData(self, start: int, stop: int, data):
         # check if data contains more information than range can give
-        assert "1" not in str(data[_len:])
+        _len = stop - start
+       
+        if isinstance(data, Bin):
+            data = data.value.copy()
+        elif isinstance(data, BitArray):
+            data = data.copy()
+        assert _len >= data.length
 
         if start > stop:
             start, stop = stop, start
-            data = data[::-1]
-        self[start:stop] = str(data[:_len]).zfill(_len)
+            data.reverse()
+
+        data = data[:_len]
+        if self.idxBegin == "right":
+            self.value.reverse()
+            data.reverse()
+        self.value.overwrite(data, start)
+        if self.idxBegin == "right":
+            self.value.reverse()
 
         return self
 
     @property
     def int(self):
-        return int(self.value, 2)
+        if self.mode == "signed":
+            return self.value.int
+        if self.mode == "unsigned":
+            return self.value.uint
+
+    @property
+    def bin(self):
+        return self.value.bin
 
     def __eq__(self, v):
-        _max = max(len(self.value), len(v.value))
-        return self.value.zfill(_max) == v.value.zfill(_max)
+        return self.value.int == v.value.int
 
     def __ne__(self, v):
-        _max = max(len(self.value), len(v.value))
-        return self.value.zfill(_max) != v.value.zfill(_max)
+        return self.value.int != v.value.int
 
     def __int__(self):
         return self.int
 
     def __str__(self):
-        return self.value
+        return self.value.bin
+
+    def __len__(self):
+        return self.value.length
 
     def __getitem__(self, subscript):
-        value = self.value
+        value = self.value.copy()
         if self.idxBegin == "right":
-            value = value[::-1]
+            value.reverse()
         if isinstance(subscript, slice):
             value = value[subscript.start : subscript.stop : subscript.step]
         elif isinstance(subscript, tuple):
@@ -92,22 +134,18 @@ class Bin(object):
             # Do your handling for a plain index
             value = value[subscript]
         if self.idxBegin == "right":
-            return Bin(value[::-1])
-        else:
-            return Bin(value)
+            value.reverse()
+        return Bin(value,
+            mode=self.mode,
+            registerLen=value.length,
+            joinDirection=self.joinDirection,
+            idxBegin=self.idxBegin)
 
     def __setitem__(self, subscript, value):
-        if isinstance(value, Bin):
-            value = str(value)
-        if self.idxBegin == "right":
-            _value = list(self.value)[::-1]
-            _value[subscript.start : subscript.stop] = value[::-1]
-            _value = list(_value)[::-1]
-        else:
-            _value = list(self.value)
-            _value[subscript.start : subscript.stop] = value
-        self.value = "".join(_value)
+        if isinstance(value, str):
+            value = BitArray(bin=value)
 
+        self.applyData(subscript.start, subscript.start+value.length, value)
 
 class I2CMapper:
     def __init__(self):
@@ -120,7 +158,8 @@ class I2CMapper:
             self.name = name
             self.mapping = mapping
             self.description = description
-
+            if len(mapping)>0:
+                self.value = list(mapping.keys())[0]  
         @property
         def possible_values(self):
             return list(self.mapping.keys())
@@ -139,16 +178,16 @@ class I2CMapper:
         @value.setter
         def value(self, value):
             if isinstance(value, Bin):
-                self._value = value
+                self._value.applyData(0, len(value), value)
             elif value in self.mapping:
                 self._value = self.mapping[value]
 
     class mnemonicFN:
         def __init__(self, name: str, mapping: dict, description: str = ""):
-            self._value = 0
             self.name = name
             self.mapping = mapping
             self.description = description
+            self.value = 0
 
         @property
         def possible_values(self):
@@ -165,12 +204,13 @@ class I2CMapper:
         @value.setter
         def value(self, value):
             if isinstance(value, Bin):
-                self._value = value
+                self._value.applyData(0, len(value), value)
             else:
                 self._value = self.mapping["in"](value)
 
     class registerRange:
         def __init__(self, start, stop, registerID=0, registerLen=8):
+            self.registerLen = registerLen
             self.range = (start, stop, registerID)
 
         def getRangeData(self, rawStreams: dict):
@@ -178,19 +218,18 @@ class I2CMapper:
             for r in [self.range]:
                 assert r[2] in rawStreams
                 if dataStream is None:
-                    dataStream = Bin(rawStreams[r[2]]).readRange(r[0], r[1] + 1)
+                    dataStream = rawStreams[r[2]].readRange(r[0], r[1] + 1)
                 else:
                     dataStream = dataStream.join(
-                        Bin(rawStreams[r[2]]).readRange(r[0], r[1] + 1)
+                        rawStreams[r[2]].readRange(r[0], r[1] + 1)
                     )
             return dataStream
 
         def applyUpdate(self, rawStream: dict, data: Bin):
             for r in [self.range]:
                 assert r[2] in rawStream
-                rawStream[r[2]] = int(
-                    Bin(rawStream[r[2]]).applyData(r[0], r[1] + 1, data)
-                )
+                rawStream[r[2]].applyData(r[0], r[1] + 1, data)
+            return self
 
         def containsRegister(self, registerID):
             return (self.range[2] == registerID)
@@ -223,10 +262,10 @@ class I2CMapper:
             for r in self.ranges:
                 assert r[2] in rawStreams
                 if dataStream is None:
-                    dataStream = Bin(rawStreams[r[2]]).readRange(r[0], r[1] + 1)
+                    dataStream = rawStreams[r[2]].readRange(r[0], r[1] + 1)
                 else:
                     dataStream = dataStream.join(
-                        Bin(rawStreams[r[2]]).readRange(r[0], r[1] + 1)
+                        rawStreams[r[2]].readRange(r[0], r[1] + 1)
                     )
             return dataStream
 
@@ -240,12 +279,11 @@ class I2CMapper:
             offset = 0
             for r in self.ranges:
                 assert r[2] in rawStream
-                rawStream[r[2]] = int(
-                    Bin(rawStream[r[2]]).applyData(
-                        r[0], r[1] + 1, data[r[0] + offset, r[1] + offset + 1]
-                    )
+                rawStream[r[2]].applyData(
+                        r[0], r[1] + 1, data[offset, (r[1]-r[0]) + offset + 1]
                 )
-                offset += r[1] - r[0] + 1
+                offset += (r[1] - r[0]) + 1
+            return self
 
         def containsRegister(self, registerID):
             return any([r[2] == registerID for r in self.ranges])
@@ -259,7 +297,7 @@ class I2CMapper:
             self.registerLen = registerLen
             self.mnemonics = []
             self.name = name
-            self.rawData = {r:0 for r in (registers if isinstance(registers, tuple) else [registers])}
+            self.rawData = {r:Bin(0, registerLen=8) for r in (registers if isinstance(registers, tuple) else [registers])}
             self.updateRanges = []
             self.initOver = True
 
@@ -271,7 +309,7 @@ class I2CMapper:
                 "Raw: \n{}".format(
                     "\n".join(
                         [
-                            "{0}: {1}".format(n, Bin(v).value)
+                            "{0}: {1}".format(n, Bin(v).value.bin)
                             for n, v in self.rawData.items()
                         ]
                     )
@@ -351,7 +389,7 @@ class I2CMapper:
                 "writeable": r.writeable,
                 "registerLen": r.registerLen,
                 "rawData": dict(
-                    map(lambda kv: (kv[0], Bin(kv[1]).value), r.rawData.items())
+                    map(lambda kv: (kv[0], kv[1].value.bin), r.rawData.items())
                 ),
                 "mnemonics": {
                     m["mapper"].name: {
@@ -370,12 +408,12 @@ class I2CMapper:
             data = yaml.load(infile)
             for n, v in data.items():
                 if n.startswith("reg_"):
-                    if v["name"] != "Reserved":
-                        register = self.get(v["name"])
-                        if register.writeable:
-                            for n0, v0 in v["mnemonics"].items():
-                                if n0 != "reserved":
-                                    setattr(register, n0, v0["value"])
+                    register = self.get(v["name"])
+                    if register.writeable:
+                        register.fillData({k: Bin(v, registerLen=8) for k, v in v["rawData"].items()})
+                        for n0, v0 in v["mnemonics"].items():
+                            if n0 != "reserved":
+                                setattr(register, n0, v0["value"])
 
     def get(self, registerName):
         for r in self.registers:

@@ -254,8 +254,9 @@ class ControlApp(app.PyComponent):
     @flx.reaction('widget.file_loaded')
     def handle_file_upload(self, *events):
         filedata = events[-1]['filedata']
-        data = [int(min(1.0, max(-1.0, float(f.replace("\r", ""))))/(1.0/2**24)) for f in filedata.split("\n") if len(f) > 0]
-        m.fir_update(data, filter=self.fir_filter)
+        data = [min(2**23-1, (max(-2**23, int(float(f.replace("\r", ""))))*2**23)) for f in filedata.split("\n") if len(f) > 0]
+        for m in self.mappers:
+            m.fir_update(data, filter=self.fir_filter)
 
     @event.action
     def on_tree_select(self, data):
@@ -316,7 +317,6 @@ class ControlApp(app.PyComponent):
         for m in self.mappers:
             m.i2c_update()
 
-
 if __name__ == "__main__":
     lock_settings = [("Mixing, Serial Data and Automute Configuration", "*")]
     mappers = [DAC_9038Q2M_Control(0x48), DAC_9038Q2M_Control(0x49)]
@@ -325,7 +325,7 @@ if __name__ == "__main__":
         # m.importYaml(
         #     r"C:\Users\webco\Documents\Projects\SABRE_I2C_Controller\configs\device_0x48_config_std.yml"
         # )
-        # pass
+        pass
     flx_app = flx.App(ControlApp, mappers, lock_settings)
     # app.launch("app", title="ES9038Control")  # to run as a desktop app
     app.create_server(host="", port=5000, backend="tornado")

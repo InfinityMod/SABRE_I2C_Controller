@@ -3,7 +3,7 @@ import math
 from smbus2 import SMBus
 from datetime import datetime
 from .layout import Bin, I2CMapper
-
+from time import sleep
 
 class DAC_9038Q2M_Control(I2CMapper):
     def __init__(self, i2cAddr):
@@ -20,8 +20,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "soft_reset",
                     {
-                        "normal operation": Bin(int("0", 2)),
-                        "reset to power-on defaults": Bin(int("1", 2)),
+                        "normal operation": Bin(int("0", 2),registerLen=1),
+                        "reset to power-on defaults": Bin(int("1", 2), registerLen=1),
                     },
                     description="Software configurable hardware reset with \
                                  the ability to reset the design to its initial power-on configuration.",
@@ -32,10 +32,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "clk_gear",
                     {
-                        "XI": Bin(int("00", 2)),
-                        "XI / 2": Bin(int("01", 2)),
-                        "XI / 4": Bin(int("10", 2)),
-                        "XI / 8": Bin(int("11", 2)),
+                        "XI": Bin(int("00", 2), registerLen=2),
+                        "XI / 2": Bin(int("01", 2), registerLen=2),
+                        "XI / 4": Bin(int("10", 2), registerLen=2),
+                        "XI / 8": Bin(int("11", 2), registerLen=2),
                     },
                     description="Configures a clock divider network that can reduce \
                                              the power consumption of the chip by reducing the clock \
@@ -47,11 +47,11 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "osc_drv",
                     {
-                        "full bias": Bin(int("0000", 2)),
-                        "3/4 bias": Bin(int("1000", 2)),
-                        "1/2 bias": Bin(int("1100", 2)),
-                        "1/4 bias": Bin(int("1110", 2)),
-                        "shutdown oscillator": Bin(int("1111", 2)),
+                        "full bias": Bin(int("0000", 2), registerLen=4),
+                        "3/4 bias": Bin(int("1000", 2), registerLen=4),
+                        "1/2 bias": Bin(int("1100", 2), registerLen=4),
+                        "1/4 bias": Bin(int("1110", 2), registerLen=4),
+                        "shutdown oscillator": Bin(int("1111", 2), registerLen=4),
                     },
                     description="Oscillator drive specifies the bias current to the oscillator pad.",
                 ),
@@ -62,10 +62,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "input_select",
                     {
-                        "serial": Bin(int("00", 2)),
-                        "SPDIF": Bin(int("01", 2)),
-                        "Reserved": Bin(int("10", 2)),
-                        "DSD": Bin(int("11", 2)),
+                        "serial": Bin(int("00", 2), registerLen=2),
+                        "SPDIF": Bin(int("01", 2), registerLen=2),
+                        "Reserved": Bin(int("10", 2), registerLen=2),
+                        "DSD": Bin(int("11", 2), registerLen=2),
                     },
                     description="Configures the Sabre to use a particular input decoder if auto_select is disabled.",
                 ),
@@ -75,10 +75,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "auto_select",
                     {
-                        "disable auto-select": Bin(int("00", 2)),
-                        "DSD or Serial": Bin(int("01", 2)),
-                        "SPDIF or Serial": Bin(int("10", 2)),
-                        "DSD, SPDIF or Serial": Bin(int("11", 2)),
+                        "disable auto-select": Bin(int("00", 2), registerLen=2),
+                        "DSD or Serial": Bin(int("01", 2), registerLen=2),
+                        "SPDIF or Serial": Bin(int("10", 2), registerLen=2),
+                        "DSD, SPDIF or Serial": Bin(int("11", 2), registerLen=2),
                     },
                     description="Allows the Sabre to automatically select between either serial (I2S) or DSD input formats.",
                 ),
@@ -88,10 +88,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "serial_mode",
                     {
-                        "I2S Mode": Bin(int("00", 2)),
-                        "left-justified mode": Bin(int("01", 2)),
-                        "right-justified mode": Bin(int("10", 2)),
-                        "right-justified mode2": Bin(int("11", 2)),
+                        "I2S Mode": Bin(int("00", 2), registerLen=2),
+                        "left-justified mode": Bin(int("01", 2), registerLen=2),
+                        "right-justified mode": Bin(int("10", 2), registerLen=2),
+                        "right-justified mode2": Bin(int("11", 2), registerLen=2),
                     },
                     description="Configures the type of serial data.",
                 ),
@@ -101,10 +101,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "serial_length",
                     {
-                        "16 bits": Bin(int("00", 2)),
-                        "24 bits": Bin(int("01", 2)),
-                        "32 bits": Bin(int("10", 2)),
-                        "32 bits2": Bin(int("11", 2)),
+                        "16 bits": Bin(int("00", 2), registerLen=2),
+                        "24 bits": Bin(int("01", 2), registerLen=2),
+                        "32 bits": Bin(int("10", 2), registerLen=2),
+                        "32 bits2": Bin(int("11", 2), registerLen=2),
                     },
                     description="Selects how many DATA_CLK pulses exist per data word.",
                 ),
@@ -115,10 +115,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "ch1_mix_sel",
                     {
-                        "ch1": Bin(int("00", 2)),
-                        "ch2": Bin(int("01", 2)),
-                        "Reserved": Bin(int("10", 2)),
-                        "Reserved": Bin(int("11", 2)),
+                        "ch1": Bin(int("00", 2), registerLen=2),
+                        "ch2": Bin(int("01", 2), registerLen=2),
+                        "Reserved": Bin(int("10", 2), registerLen=2),
+                        "Reserved": Bin(int("11", 2), registerLen=2),
                     },
                     description="Selects which data is mapped to DAC 1.",
                 ),
@@ -128,10 +128,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "ch2_mix_sel",
                     {
-                        "ch1": Bin(int("00", 2)),
-                        "ch2": Bin(int("01", 2)),
-                        "Reserved": Bin(int("10", 2)),
-                        "Reservedl": Bin(int("11", 2)),
+                        "ch1": Bin(int("00", 2), registerLen=2),
+                        "ch2": Bin(int("01", 2), registerLen=2),
+                        "Reserved": Bin(int("10", 2), registerLen=2),
+                        "Reservedl": Bin(int("11", 2), registerLen=2),
                     },
                     description="Selects which data is mapped to DAC 2.",
                 ),
@@ -141,10 +141,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "reserved",
                     {
-                        "Reserved": Bin(int("00", 2)),
-                        "Reserved": Bin(int("01", 2)),
-                        "Reserved": Bin(int("10", 2)),
-                        "Reserved": Bin(int("11", 2)),
+                        "Reserved": Bin(int("00", 2), registerLen=2),
+                        "Reserved": Bin(int("01", 2), registerLen=2),
+                        "Reserved": Bin(int("10", 2), registerLen=2),
+                        "Reserved": Bin(int("11", 2), registerLen=2),
                     },
                     description="Reserved",
                 ),
@@ -154,10 +154,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "automute",
                     {
-                        "normal operation": Bin(int("00", 2)),
-                        "perform mute": Bin(int("01", 2)),
-                        "ramp2ground": Bin(int("10", 2)),
-                        "perform mute/ramp2ground": Bin(int("11", 2)),
+                        "normal operation": Bin(int("00", 2), registerLen=2),
+                        "perform mute": Bin(int("01", 2), registerLen=2),
+                        "ramp2ground": Bin(int("10", 2), registerLen=2),
+                        "perform mute/ramp2ground": Bin(int("11", 2), registerLen=2),
                     },
                     description="Configures the automute state machine, which allows the Sabre 2M to perform different power saving and sound optimizations.",
                 ),
@@ -168,8 +168,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "reserved",
                     {
-                        "Reserved": Bin(int("0", 2)),
-                        "Reserved": Bin(int("1", 2)),
+                        "Reserved": Bin(int("0", 2), registerLen=1),
+                        "Reserved": Bin(int("1", 2), registerLen=1),
                     },
                     description="Reserved",
                 ),
@@ -179,8 +179,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "spdif_ig_valid",
                     {
-                        "ignore validflag": Bin(int("1", 2)),
-                        "mute on invalid": Bin(int("0", 2)),
+                        "ignore validflag": Bin(int("1", 2), registerLen=1),
+                        "mute on invalid": Bin(int("0", 2), registerLen=1),
                     },
                     description="Configures the SPDIF decoder to ignore the ‘valid’ flag in the SPDIF stream.",
                 ),
@@ -190,8 +190,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "spdif_ig_data",
                     {
-                        "ignore dataflage": Bin(int("1", 2)),
-                        "mute on dataflag": Bin(int("0", 2)),
+                        "ignore dataflage": Bin(int("1", 2), registerLen=1),
+                        "mute on dataflag": Bin(int("0", 2), registerLen=1),
                     },
                     description="Configures the SPDIF decoder to ignore the ‘data’ flag in the channel status bits.",
                 ),
@@ -201,8 +201,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "spdif_user_bits",
                     {
-                        "SPDIF user bits": Bin(int("1", 2)),
-                        "SPDIF channel status bits": Bin(int("0", 2)),
+                        "SPDIF user bits": Bin(int("1", 2), registerLen=1),
+                        "SPDIF channel status bits": Bin(int("0", 2), registerLen=1),
                     },
                     description="Both SPDIF channel status bits and SPDIF user bits are available for readback via \
                                              the I2C interface. To reduce register count the channel status bits and user bits \
@@ -212,7 +212,7 @@ class DAC_9038Q2M_Control(I2CMapper):
             )
             .addMnemonic(
                 self.registerRange(4, 7, registerID=3),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             ),
             self.register(4, name="Automute Time").addMnemonic(
                 self.registerRange(0, 7, registerID=4),
@@ -220,9 +220,9 @@ class DAC_9038Q2M_Control(I2CMapper):
                     "automute_time",
                     {
                         "in": (
-                            lambda value: Bin(int(2096896 / value * FSR))
+                            lambda value: Bin(int(2096896 / value * FSR), registerLen=8)
                             if value != 0
-                            else Bin(0)
+                            else Bin(0, registerLen=8)
                         ),
                         "out": (
                             lambda value: 2096896 / (int(value) * FSR)
@@ -243,7 +243,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "automute_level",
                     {
-                        "in": lambda value: Bin(int(-value)),
+                        "in": lambda value: Bin(int(-value), registerLen=7),
                         "out": lambda value: -int(value),
                     },
                     description="Configures the threshold which the audio must be \
@@ -258,8 +258,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "reserved",
                     {
-                        "Reserved": Bin(int("0", 2)),
-                        "Reserved": Bin(int("1", 2)),
+                        "Reserved": Bin(int("0", 2), registerLen=1),
+                        "Reserved": Bin(int("1", 2), registerLen=1),
                     },
                     description="Reserved",
                 ),
@@ -271,7 +271,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                     "volume_rate",
                     {
                         "in": (
-                            lambda value: Bin(int(math.log(value * 512 / FSR, 2.0)))
+                            lambda value: Bin(int(math.log(value * 512 / FSR, 2.0) if value != 0 else 0), registerLen=3)
                         ),
                         "out": (lambda value: (2 ** int(value) * FSR) / 512),
                     },
@@ -285,8 +285,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "dop_enable",
                     {
-                        "enabled": Bin(int("1", 2)),
-                        "disabled": Bin(int("0", 2)),
+                        "enabled": Bin(int("1", 2), registerLen=1),
+                        "disabled": Bin(int("0", 2), registerLen=1),
                     },
                     description="Selects whether the DSD over PCM (DoP) logic is enabled.",
                 ),
@@ -296,10 +296,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "deemph_sel",
                     {
-                        "Reserved": Bin(int("11", 2)),
-                        "48kHz": Bin(int("10", 2)),
-                        "44.1kHz": Bin(int("01", 2)),
-                        "32kHz": Bin(int("00", 2)),
+                        "Reserved": Bin(int("11", 2), registerLen=2),
+                        "48kHz": Bin(int("10", 2), registerLen=2),
+                        "44.1kHz": Bin(int("01", 2), registerLen=2),
+                        "32kHz": Bin(int("00", 2), registerLen=2),
                     },
                     description="Selects which de-emphasis filter is used.",
                 ),
@@ -309,8 +309,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "deemph_bypass",
                     {
-                        "disable": Bin(int("1", 2)),
-                        "enable": Bin(int("0", 2)),
+                        "disable": Bin(int("1", 2), registerLen=1),
+                        "enable": Bin(int("0", 2), registerLen=1),
                     },
                     description="Enables or disables the built-in de-emphasis filters.",
                 ),
@@ -320,8 +320,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "auto_deemph",
                     {
-                        "disable": Bin(int("1", 2)),
-                        "enable": Bin(int("0", 2)),
+                        "disable": Bin(int("1", 2), registerLen=1),
+                        "enable": Bin(int("0", 2), registerLen=1),
                     },
                     description="Automatically engages the de-emphasis filters when SPDIF \
                                              data is provides and the SPDIF channel status bits contains\
@@ -334,44 +334,44 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "mute",
                     {
-                        "mute both channels": Bin(int("1", 2)),
-                        "normal operation": Bin(int("0", 2)),
+                        "mute both channels": Bin(int("1", 2), registerLen=1),
+                        "normal operation": Bin(int("0", 2), registerLen=1),
                     },
                     description="Mutes all 2 channels of the Sabre DAC.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(1, 2, registerID=7),
-                self.mnemonicMapper("reserved", {}, description="Reserved."),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=2)}, description="Reserved."),
             )
             .addMnemonic(
                 self.registerRange(3, 3, registerID=7),
                 self.mnemonicMapper(
                     "bypass_osf",
                     {
-                        "built-in oversampling": Bin(int("0", 2)),
-                        "external oversampling": Bin(int("1", 2)),
+                        "built-in oversampling": Bin(int("0", 2), registerLen=1),
+                        "external oversampling": Bin(int("1", 2), registerLen=1),
                     },
                     description="Allows the use of an external 8x upsampling filter, bypassing the internal interpolating FIR filter.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(4, 4, registerID=7),
-                self.mnemonicMapper("reserved", {}, description="Reserved."),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved."),
             )
             .addMnemonic(
                 self.registerRange(5, 7, registerID=7),
                 self.mnemonicMapper(
                     "filter_shape",
                     {
-                        "brick_wall": Bin(int("111", 2)),
-                        "corrected minimum phase fast roll-off": Bin(int("110", 2)),
-                        "Reserved": Bin(int("101", 2)),
-                        "apodizing fast roll-off filter": Bin(int("100", 2)),
-                        "minimum phase slow roll-off filter": Bin(int("011", 2)),
-                        "minimum phase fast roll-off filter": Bin(int("010", 2)),
-                        "linear phase slow roll-off filter": Bin(int("001", 2)),
-                        "linear phase fast roll-off filter": Bin(int("000", 2)),
+                        "brick_wall": Bin(int("111", 2), registerLen=3),
+                        "corrected minimum phase fast roll-off": Bin(int("110", 2), registerLen=3),
+                        "Reserved": Bin(int("101", 2), registerLen=3),
+                        "apodizing fast roll-off filter": Bin(int("100", 2), registerLen=3),
+                        "minimum phase slow roll-off filter": Bin(int("011", 2), registerLen=3),
+                        "minimum phase fast roll-off filter": Bin(int("010", 2), registerLen=3),
+                        "linear phase slow roll-off filter": Bin(int("001", 2), registerLen=3),
+                        "linear phase fast roll-off filter": Bin(int("000", 2), registerLen=3),
                     },
                     description="Selects the type of filter to use during the 8x FIR interpolation phase.",
                 ),
@@ -382,22 +382,22 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "gpio1_cfg",
                     {
-                        "Automute Status": Bin(0),
-                        "Lock Status": Bin(1),
-                        "Volume Min": Bin(2),
-                        "CLK": Bin(3),
-                        "Automute/Lock Interrupt": Bin(4),
-                        "ADC_CLK": Bin(5),
-                        "Reserved": Bin(6),
-                        "Output 1'b0": Bin(7),
-                        "Standard Input": Bin(8),
-                        "Input Select": Bin(9),
-                        "Mute All": Bin(10),
-                        "Reserved": Bin(11),
-                        "Reserved": Bin(12),
-                        "Reserved": Bin(13),
-                        "Soft Start Complete": Bin(14),
-                        "Output 1'b1": Bin(15),
+                        "Automute Status": Bin(0, registerLen=4),
+                        "Lock Status": Bin(1, registerLen=4),
+                        "Volume Min": Bin(2, registerLen=4),
+                        "CLK": Bin(3, registerLen=4),
+                        "Automute/Lock Interrupt": Bin(4, registerLen=4),
+                        "ADC_CLK": Bin(5, registerLen=4),
+                        "Reserved": Bin(6, registerLen=4),
+                        "Output 1'b0": Bin(7, registerLen=4),
+                        "Standard Input": Bin(8, registerLen=4),
+                        "Input Select": Bin(9, registerLen=4),
+                        "Mute All": Bin(10, registerLen=4),
+                        "Reserved": Bin(11, registerLen=4),
+                        "Reserved": Bin(12, registerLen=4),
+                        "Reserved": Bin(13, registerLen=4),
+                        "Soft Start Complete": Bin(14, registerLen=4),
+                        "Output 1'b1": Bin(15, registerLen=4),
                     },
                     description="The GPIO can each be configured in one of several ways. \n\
                                              The table below is for programming each independent GPIO configuration value.",
@@ -408,35 +408,35 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "gpio2_cfg",
                     {
-                        "Automute Status": Bin(0),
-                        "Lock Status": Bin(1),
-                        "Volume Min": Bin(2),
-                        "CLK": Bin(3),
-                        "Automute/Lock Interrupt": Bin(4),
-                        "ADC_CLK": Bin(5),
-                        "Reserved": Bin(6),
-                        "Output 1'b0": Bin(7),
-                        "Standard Input": Bin(8),
-                        "Input Select": Bin(9),
-                        "Mute All": Bin(10),
-                        "Reserved": Bin(11),
-                        "Reserved": Bin(12),
-                        "ADC.Input": Bin(13),
-                        "Soft Start Complete": Bin(14),
-                        "Output 1'b1": Bin(15),
+                        "Automute Status": Bin(0, registerLen=4),
+                        "Lock Status": Bin(1, registerLen=4),
+                        "Volume Min": Bin(2, registerLen=4),
+                        "CLK": Bin(3, registerLen=4),
+                        "Automute/Lock Interrupt": Bin(4, registerLen=4),
+                        "ADC_CLK": Bin(5, registerLen=4),
+                        "Reserved": Bin(6, registerLen=4),
+                        "Output 1'b0": Bin(7, registerLen=4),
+                        "Standard Input": Bin(8, registerLen=4),
+                        "Input Select": Bin(9, registerLen=4),
+                        "Mute All": Bin(10, registerLen=4),
+                        "Reserved": Bin(11, registerLen=4),
+                        "Reserved": Bin(12, registerLen=4),
+                        "ADC.Input": Bin(13, registerLen=4),
+                        "Soft Start Complete": Bin(14, registerLen=4),
+                        "Output 1'b1": Bin(15, registerLen=4),
                     },
                     description="The GPIO can each be configured in one of several ways. \n\
                                              The table below is for programming each independent GPIO configuration value.",
                 ),
             ),
-            self.register(9, name="Reserved")
+            self.register(9, name="Reserved 9")
             .addMnemonic(
                 self.registerRange(0, 3, registerID=9),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(4, 7, registerID=9),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             ),
             self.register(10, name="Master Mode and Sync Configuration")
             .addMnemonic(
@@ -444,22 +444,22 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "lock_speed",
                     {
-                        "16384 FSL": Bin(0),
-                        "8192 FSL": Bin(1),
-                        "5461 FSL": Bin(2),
-                        "4096 FSL": Bin(3),
-                        "3276 FSL": Bin(4),
-                        "2730 FSL": Bin(5),
-                        "2340 FSL": Bin(6),
-                        "2048 FSL": Bin(7),
-                        "1820 FSL": Bin(8),
-                        "1638 FSL": Bin(9),
-                        "1489 FSL": Bin(10),
-                        "1365 FSL": Bin(11),
-                        "1260 FSL": Bin(12),
-                        "1170 FSL": Bin(13),
-                        "1092 FSL": Bin(14),
-                        "1024 FSL": Bin(15),
+                        "16384 FSL": Bin(0, registerLen=4),
+                        "8192 FSL": Bin(1, registerLen=4),
+                        "5461 FSL": Bin(2, registerLen=4),
+                        "4096 FSL": Bin(3, registerLen=4),
+                        "3276 FSL": Bin(4, registerLen=4),
+                        "2730 FSL": Bin(5, registerLen=4),
+                        "2340 FSL": Bin(6, registerLen=4),
+                        "2048 FSL": Bin(7, registerLen=4),
+                        "1820 FSL": Bin(8, registerLen=4),
+                        "1638 FSL": Bin(9, registerLen=4),
+                        "1489 FSL": Bin(10, registerLen=4),
+                        "1365 FSL": Bin(11, registerLen=4),
+                        "1260 FSL": Bin(12, registerLen=4),
+                        "1170 FSL": Bin(13, registerLen=4),
+                        "1092 FSL": Bin(14, registerLen=4),
+                        "1024 FSL": Bin(15, registerLen=4),
                     },
                     description="Sets the number of audio samples required before the DPLL \
                                              and ASRC lock to the incoming signal. More audio samples \
@@ -472,8 +472,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "128fs_mode (128*FSR mode)",
                     {
-                        "enables MCLK": Bin(int("1", 2)),
-                        "disables MCLK": Bin(int("0", 2)),
+                        "enables MCLK": Bin(int("1", 2), registerLen=1),
+                        "disables MCLK": Bin(int("0", 2), registerLen=1),
                     },
                     description="Enables operation of the DAC while in synchronous mode with a \
                                              128*FSR MCLK in PCM normal or OSF bypass mode only.",
@@ -484,10 +484,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "master_div",
                     {
-                        "MCLK/2": Bin(int("00", 2)),
-                        "MCLK/4": Bin(int("01", 2)),
-                        "MCLK/8": Bin(int("10", 2)),
-                        "MCLK/16": Bin(int("11", 2)),
+                        "MCLK/2": Bin(int("00", 2), registerLen=2),
+                        "MCLK/4": Bin(int("01", 2), registerLen=2),
+                        "MCLK/8": Bin(int("10", 2), registerLen=2),
+                        "MCLK/16": Bin(int("11", 2), registerLen=2),
                     },
                     description="Sets the frame clock (DATA1) and DATA_CLK frequencies when in \
                                              master mode. This register is used when in normal synchronous operation. DATA_CLK frequency = ***",
@@ -498,8 +498,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "master_mode",
                     {
-                        "disable": Bin(int("0", 2)),
-                        "enable": Bin(int("1", 2)),
+                        "disable": Bin(int("0", 2), registerLen=1),
+                        "enable": Bin(int("1", 2), registerLen=1),
                     },
                     description="Enables master mode which causes the Sabre to drive the DATA_CLK and DATA1 signals when \
                                                 in I2S mode. Can also be enabled when in DSD mode to enable DATA_CLK only.",
@@ -508,18 +508,18 @@ class DAC_9038Q2M_Control(I2CMapper):
             self.register(11, name="SPDIF Select")
             .addMnemonic(
                 self.registerRange(0, 3, registerID=11),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(4, 7, registerID=11),
                 self.mnemonicMapper(
                     "spdif_sel",
                     {
-                        "DATA_CLK": Bin(0),
-                        "DATA1": Bin(1),
-                        "DATA2": Bin(2),
-                        "GPIO1": Bin(3),
-                        "GPIO2": Bin(4),
+                        "DATA_CLK": Bin(0, registerLen=4),
+                        "DATA1": Bin(1, registerLen=4),
+                        "DATA2": Bin(2, registerLen=4),
+                        "GPIO1": Bin(3, registerLen=4),
+                        "GPIO2": Bin(4, registerLen=4),
                     },
                     description="Selects which input to use when decoding SPDIF data. Note: If using a \
                                                 GPIO the GPIO configuration must be set to an input.",
@@ -531,47 +531,47 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "dpll_bw_dsd",
                     {
-                        "DPLL Off": Bin(0),
-                        "Lowerst Bandwidth": Bin(1),
-                        "Bandwith Mode 2": Bin(2),
-                        "Bandwith Mode 3": Bin(3),
-                        "Bandwith Mode 4": Bin(4),
-                        "Bandwith Mode 5": Bin(5),
-                        "Bandwith Mode 6": Bin(6),
-                        "Bandwith Mode 7": Bin(7),
-                        "Bandwith Mode 8": Bin(8),
-                        "Bandwith Mode 9": Bin(9),
-                        "Bandwith Mode 10": Bin(10),
-                        "Bandwith Mode 11": Bin(11),
-                        "Bandwith Mode 12": Bin(12),
-                        "Bandwith Mode 13": Bin(13),
-                        "Bandwith Mode 14": Bin(14),
-                        "Highest Bandwidth": Bin(15),
+                        "DPLL Off": Bin(0, registerLen=4),
+                        "Lowerst Bandwidth": Bin(1, registerLen=4),
+                        "Bandwith Mode 2": Bin(2, registerLen=4),
+                        "Bandwith Mode 3": Bin(3, registerLen=4),
+                        "Bandwith Mode 4": Bin(4, registerLen=4),
+                        "Bandwith Mode 5": Bin(5, registerLen=4),
+                        "Bandwith Mode 6": Bin(6, registerLen=4),
+                        "Bandwith Mode 7": Bin(7, registerLen=4),
+                        "Bandwith Mode 8": Bin(8, registerLen=4),
+                        "Bandwith Mode 9": Bin(9, registerLen=4),
+                        "Bandwith Mode 10": Bin(10, registerLen=4),
+                        "Bandwith Mode 11": Bin(11, registerLen=4),
+                        "Bandwith Mode 12": Bin(12, registerLen=4),
+                        "Bandwith Mode 13": Bin(13, registerLen=4),
+                        "Bandwith Mode 14": Bin(14, registerLen=4),
+                        "Highest Bandwidth": Bin(15, registerLen=4),
                     },
                     description="Sets the bandwidth of the DPLL when operating in DSD mode.",
-                ),
+                )
             )
             .addMnemonic(
                 self.registerRange(4, 7, registerID=12),
                 self.mnemonicMapper(
                     "dpll_bw_serial",
                     {
-                        "DPLL Off": Bin(0),
-                        "Lowerst Bandwidth": Bin(1),
-                        "Bandwith Mode 2": Bin(2),
-                        "Bandwith Mode 3": Bin(3),
-                        "Bandwith Mode 4": Bin(4),
-                        "Bandwith Mode 5": Bin(5),
-                        "Bandwith Mode 6": Bin(6),
-                        "Bandwith Mode 7": Bin(7),
-                        "Bandwith Mode 8": Bin(8),
-                        "Bandwith Mode 9": Bin(9),
-                        "Bandwith Mode 10": Bin(10),
-                        "Bandwith Mode 11": Bin(11),
-                        "Bandwith Mode 12": Bin(12),
-                        "Bandwith Mode 13": Bin(13),
-                        "Bandwith Mode 14": Bin(14),
-                        "Highest Bandwidth": Bin(15),
+                        "DPLL Off": Bin(0, registerLen=4),
+                        "Lowerst Bandwidth": Bin(1, registerLen=4),
+                        "Bandwith Mode 2": Bin(2, registerLen=4),
+                        "Bandwith Mode 3": Bin(3, registerLen=4),
+                        "Bandwith Mode 4": Bin(4, registerLen=4),
+                        "Bandwith Mode 5": Bin(5, registerLen=4),
+                        "Bandwith Mode 6": Bin(6, registerLen=4),
+                        "Bandwith Mode 7": Bin(7, registerLen=4),
+                        "Bandwith Mode 8": Bin(8, registerLen=4),
+                        "Bandwith Mode 9": Bin(9, registerLen=4),
+                        "Bandwith Mode 10": Bin(10, registerLen=4),
+                        "Bandwith Mode 11": Bin(11, registerLen=4),
+                        "Bandwith Mode 12": Bin(12, registerLen=4),
+                        "Bandwith Mode 13": Bin(13, registerLen=4),
+                        "Bandwith Mode 14": Bin(14, registerLen=4),
+                        "Highest Bandwidth": Bin(15, registerLen=4),
                     },
                     description="Sets the bandwidth of the DPLL when operating in I2S mode.",
                 ),
@@ -579,15 +579,15 @@ class DAC_9038Q2M_Control(I2CMapper):
             self.register(13, name="THD Bypass")
             .addMnemonic(
                 self.registerRange(0, 5, registerID=13),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=6)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(6, 6, registerID=13),
                 self.mnemonicMapper(
                     "thd_enb",
                     {
-                        "enable THD": Bin(1),
-                        "disable THD": Bin(0),
+                        "enable THD": Bin(1, registerLen=1),
+                        "disable THD": Bin(0, registerLen=1),
                     },
                     description="Selects whether to disable the THD compensation logic. THD \
                                               compensation is enabled by default and can be configured to correct \
@@ -596,7 +596,7 @@ class DAC_9038Q2M_Control(I2CMapper):
             )
             .addMnemonic(
                 self.registerRange(7, 7, registerID=13),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             ),
             self.register(14, name="Soft Start Configuration")
             .addMnemonic(
@@ -604,7 +604,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "soft start time",
                     {
-                        "in": lambda x: Bin(int(math.log2(x * MCLK / 4096) - 1)),
+                        "in": lambda x: Bin(int(math.log2(x * MCLK / 4096) - 1 if x != 0 else 0), registerLen=5),
                         "out": lambda x: 4096 * (2 ** (int(x) + 1)) / MCLK,
                     },
                     description="Sets the amount of time that it takes to perform a \
@@ -614,29 +614,29 @@ class DAC_9038Q2M_Control(I2CMapper):
             )
             .addMnemonic(
                 self.registerRange(5, 5, registerID=14),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(6, 6, registerID=14),
                 self.mnemonicMapper(
                     "soft_start_on_lock",
                     {
-                        "Always soft start": Bin(0),
-                        "Soft start when locked": Bin(1),
+                        "Always soft start": Bin(0, registerLen=1),
+                        "Soft start when locked": Bin(1, registerLen=1),
                     },
                     description="Reserved",
                 ),
             )
             .addMnemonic(
                 self.registerRange(7, 7, registerID=14),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             ),
             self.register((15, 16), name="Volume Control")
             .addMnemonic(
                 self.registerMultiRange(0, 7, registerID=15),
                 self.mnemonicFN(
                     "volume1",
-                    {"in": lambda x: Bin(-int(x) * 2), "out": lambda x: -int(x) * 0.5},
+                    {"in": lambda x: Bin(-int(x) * 2, registerLen=8), "out": lambda x: -int(x) * 0.5},
                     description="Default of 8’d80 (-40dB) \
                                               -0dB to -127.5dB with 0.5dB steps",
                 ),
@@ -645,7 +645,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(0, 7, registerID=16),
                 self.mnemonicFN(
                     "volume2",
-                    {"in": lambda x: Bin(-int(x) * 2), "out": lambda x: -int(x) * 0.5},
+                    {"in": lambda x: Bin(-int(x) * 2, registerLen=8), "out": lambda x: -int(x) * 0.5},
                     description="Default of 8’d80 (-40dB) \
                                               -0dB to -127.5dB with 0.5dB steps",
                 ),
@@ -654,7 +654,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(0, 31, registerID="all"),
                 self.mnemonicFN(
                     "master_trim",
-                    {"in": lambda x: Bin(int(-x * 2)), "out": lambda x: -int(x) * 0.5},
+                    {"in": lambda x: Bin(int(-x * 2), registerLen=4*8), "out": lambda x: -int(x) * 0.5},
                     description="A 32 bit signed value that sets the 0dB level for all volume controls. \
                                               Defaults to full-scale (32’h7FFFFFFF).",
                 ),
@@ -662,17 +662,17 @@ class DAC_9038Q2M_Control(I2CMapper):
             self.register(21, name="GPIO Input Selection")
             .addMnemonic(
                 self.registerRange(0, 3, registerID=21),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(4, 5, registerID=21),
                 self.mnemonicMapper(
                     "gpio_sel1",
                     {
-                        "serial data (I2S/LJ)": Bin(0),
-                        "SPDIF": Bin(1),
-                        "Reserved": Bin(2),
-                        "DSD data": Bin(3),
+                        "serial data (I2S/LJ)": Bin(0, registerLen=2),
+                        "SPDIF": Bin(1, registerLen=2),
+                        "Reserved": Bin(2, registerLen=2),
+                        "DSD data": Bin(3, registerLen=2),
                     },
                     description="Selects which input type will be selected when GPIO1 = Input Select",
                 ),
@@ -682,10 +682,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "gpio_sel2",
                     {
-                        "serial data (I2S/LJ)": Bin(0),
-                        "SPDIF": Bin(1),
-                        "Reserved": Bin(2),
-                        "DSD data": Bin(3),
+                        "serial data (I2S/LJ)": Bin(0, registerLen=2),
+                        "SPDIF": Bin(1, registerLen=2),
+                        "Reserved": Bin(2, registerLen=2),
+                        "DSD data": Bin(3, registerLen=2),
                     },
                     description="Selects which input type will be selected when GPIO2 = Input Select",
                 ),
@@ -694,7 +694,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(0, 15, registerID="all"),
                 self.mnemonicFN(
                     "thd_comp_c2",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=16), "out": lambda x: int(x)},
                     description="A 16-bit signed coefficient for correcting for the \
                                               second harmonic distortion. Defaults to 16’d0.",
                 ),
@@ -703,14 +703,14 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(0, 15, registerID="all"),
                 self.mnemonicFN(
                     "thd_comp_c3",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=16), "out": lambda x: int(x)},
                     description="A 16-bit signed coefficient for correcting for the \
                                               third harmonic distortion. Defaults to 16’d0.",
                 ),
             ),
-            self.register(26, name="Reserved").addMnemonic(
+            self.register(26, name="Reserved 26").addMnemonic(
                 self.registerRange(0, 7, registerID=26),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=8)}, description="Reserved"),
             ),
             self.register(27, name="General Configuration")
             .addMnemonic(
@@ -718,14 +718,14 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "18db_gain",
                     {
-                        "No gain on either channels": Bin(int("00", 2)),
+                        "No gain on either channels": Bin(int("00", 2), registerLen=2),
                         "Normal gain on channel 2, +18dB gain on channel 1": Bin(
-                            int("01", 2)
+                            int("01", 2), registerLen=2
                         ),
                         "+18dB gain on channel 2, normal gain on channel 1": Bin(
-                            int("10", 2)
+                            int("10", 2), registerLen=2
                         ),
-                        "+18dB gain on both channel 2 and channel 1": Bin(int("11", 2)),
+                        "+18dB gain on both channel 2 and channel 1": Bin(int("11", 2), registerLen=2),
                     },
                     description="Applies +18dB gain to a the DAC datapath.",
                 ),
@@ -735,8 +735,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "latch_volume",
                     {
-                        "Disables updates": Bin(0),
-                        "Syncronize to volume registers": Bin(1),
+                        "Disables updates": Bin(0, registerLen=1),
+                        "Syncronize to volume registers": Bin(1, registerLen=1),
                     },
                     description="Keeps the volume coefficients in synchronization with the programmed volume register.",
                 ),
@@ -746,8 +746,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "ch1_volume",
                     {
-                        "Allow independent control": Bin(0),
-                        "Use the ch1 volume for ch1/2": Bin(1),
+                        "Allow independent control": Bin(0, registerLen=1),
+                        "Use the ch1 volume for ch1/2": Bin(1, registerLen=1),
                     },
                     description="Allows channel 2 to share the channel 1 volume control. \
                                               This allows forperfectly syncing up the two channel gains.",
@@ -755,41 +755,41 @@ class DAC_9038Q2M_Control(I2CMapper):
             )
             .addMnemonic(
                 self.registerRange(4, 4, registerID=27),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(5, 6, registerID=27),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=2)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(7, 7, registerID=27),
                 self.mnemonicMapper(
                     "asrc_en",
                     {
-                        "Disabled": Bin(0),
-                        "Enabled": Bin(1),
+                        "Disabled": Bin(0, registerLen=1),
+                        "Enabled": Bin(1, registerLen=1),
                     },
                     description="Selects whether the ASRC is enabled.",
                 ),
             ),
-            self.register(28, name="Reserved").addMnemonic(
+            self.register(28, name="Reserved 28").addMnemonic(
                 self.registerRange(0, 7, registerID=28),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=8)}, description="Reserved"),
             ),
             self.register(29, name="GPIO Configuration")
             .addMnemonic(
                 self.registerRange(0, 5, registerID=29),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=6)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(6, 7, registerID=29),
                 self.mnemonicMapper(
                     "invert_gpio",
                     {
-                        "Normal": Bin(int("00", 2)),
-                        "Invert GPIO1": Bin(int("01", 2)),
-                        "Invert GPIO2": Bin(int("10", 2)),
-                        "Invert GPIO1/2": Bin(int("11", 2)),
+                        "Normal": Bin(int("00", 2), registerLen=2),
+                        "Invert GPIO1": Bin(int("01", 2), registerLen=2),
+                        "Invert GPIO2": Bin(int("10", 2), registerLen=2),
+                        "Invert GPIO1/2": Bin(int("11", 2), registerLen=2),
                     },
                     description="Allows each GPIO output to be inverted independently.",
                 ),
@@ -800,7 +800,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "cp_clk_div",
                     {
-                        "in": lambda x: Bin(int(FCLK / (x * 2)) if x != 0 else 0),
+                        "in": lambda x: Bin(int(FCLK / (x * 2) if x != 0 else 0), registerLen=12),
                         "out": lambda x: FCLK / (int(x) * 2) if x != Bin(0) else 0,
                     },
                     description="Sets the divider ratio for the change pump clock. fclk is the frequency of the clock selected by cp_clk sel.",
@@ -811,10 +811,10 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "cp_clk_en",
                     {
-                        "Tristate output": Bin(int("00", 2)),
-                        "Tied to GND": Bin(int("01", 2)),
-                        "Tied to DVDD": Bin(int("10", 2)),
-                        "Active": Bin(int("11", 2)),
+                        "Tristate output": Bin(int("00", 2), registerLen=2),
+                        "Tied to GND": Bin(int("01", 2), registerLen=2),
+                        "Tied to DVDD": Bin(int("10", 2), registerLen=2),
+                        "Active": Bin(int("11", 2), registerLen=2),
                     },
                     description="Sets the state of the charge pump clock.",
                 ),
@@ -824,24 +824,24 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "cp_clk_sel",
                     {
-                        "f_CLK=XI": Bin(int("00", 2)),
-                        "Reserved": Bin(int("01", 2)),
-                        "Reserved": Bin(int("10", 2)),
-                        "Reserved": Bin(int("11", 2)),
+                        "f_CLK=XI": Bin(int("00", 2), registerLen=2),
+                        "Reserved": Bin(int("01", 2), registerLen=2),
+                        "Reserved": Bin(int("10", 2), registerLen=2),
+                        "Reserved": Bin(int("11", 2), registerLen=2),
                     },
                     description="Selects which clock will be used as the reference clock (fCLK ) for the charge pump clock.",
                 ),
             ),
-            self.register(32, name="Reserved").addMnemonic(
+            self.register(32, name="Reserved 32").addMnemonic(
                 self.registerRange(0, 7, registerID=32),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=8)}, description="Reserved"),
             ),
             self.register(33, name="Interrupt Mask")
             .addMnemonic(
                 self.registerRange(0, 0, registerID=33),
                 self.mnemonicMapper(
                     "lock_mask",
-                    {"0_mask": Bin(0), "1_mask": Bin(1)},
+                    {"0_mask": Bin(0, registerLen=1), "1_mask": Bin(1, registerLen=1)},
                     description="Masks the lock status bit from flagging an interrupt.",
                 ),
             )
@@ -849,24 +849,24 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerRange(1, 1, registerID=33),
                 self.mnemonicMapper(
                     "automute_mask",
-                    {"0_mask": Bin(0), "1_mask": Bin(1)},
+                    {"0_mask": Bin(0, registerLen=1), "1_mask": Bin(1, registerLen=1)},
                     description="Masks the automute bit from flagging an interrupt.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(2, 5, registerID=33),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(6, 7, registerID=33),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=2)}, description="Reserved"),
             ),
             self.register((34, 35, 36, 37), name="Programmable NCO").addMnemonic(
                 self.registerMultiRange(0, 31, registerID="all"),
                 self.mnemonicFN(
                     "nco_num",
                     {
-                        "in": lambda x: Bin(int(x * 2 ** 32 / MCLK)),
+                        "in": lambda x: Bin(int(x * 2 ** 32 / MCLK), registerLen=32),
                         "out": lambda x: (int(x) * MCLK) / 2 ** 32,
                     },
                     description="An unsigned 32-bit quantity that provides the ratio between MCLK and \
@@ -880,9 +880,9 @@ class DAC_9038Q2M_Control(I2CMapper):
                                              32’d?: enables NCO mode",
                 ),
             ),
-            self.register(38, name="Reserved").addMnemonic(
+            self.register(38, name="Reserved 38").addMnemonic(
                 self.registerRange(0, 7, registerID=38),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=8)}, description="Reserved"),
             ),
             self.register(39, name="General Configuration 2")
             .addMnemonic(
@@ -890,25 +890,25 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "sw_ctrl_en",
                     {
-                        "Switch external controlled": Bin(int("00", 2)),
-                        "Switch control is set to 0": Bin(int("01", 2)),
-                        "Reserved": Bin(int("10", 2)),
-                        "Switch control is set to 1": Bin(int("11", 2)),
+                        "Switch external controlled": Bin(int("00", 2), registerLen=2),
+                        "Switch control is set to 0": Bin(int("01", 2), registerLen=2),
+                        "Reserved": Bin(int("10", 2), registerLen=2),
+                        "Switch control is set to 1": Bin(int("11", 2), registerLen=2),
                     },
                     description="Selects the operating mode of the external switch control.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(2, 5, registerID=39),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved":Bin(0, registerLen=4)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(6, 6, registerID=39),
                 self.mnemonicMapper(
                     "amp_pdb",
                     {
-                        "Disabled": Bin(int("00", 2)),
-                        "Enabled": Bin(int("01", 2)),
+                        "Disabled": Bin(int("0", 2), registerLen=1),
+                        "Enabled": Bin(int("1", 2), registerLen=1),
                     },
                     description="Enables of disables the headphone amplifier.",
                 ),
@@ -918,8 +918,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "amp_pdb_ss",
                     {
-                        "Amplifier controlled by amp_pdb": Bin(int("00", 2)),
-                        "Shut amp down when DAC to ground": Bin(int("01", 2)),
+                        "Amplifier controlled by amp_pdb": Bin(int("0", 2), registerLen=1),
+                        "Shut amp down when DAC to ground": Bin(int("1", 2), registerLen=1),
                     },
                     description="Powers the amplifier stage down when the digital core ramps to ground. \
                                   This is useful when powering down the amplifier when in automute mode.",
@@ -930,7 +930,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerRange(0, 6, registerID=40),
                 self.mnemonicFN(
                     "coeff_addr",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=7), "out": lambda x: int(x)},
                     description="Selects the coefficient address when writing custom coefficients for the oversampling filter.",
                 ),
             )
@@ -939,8 +939,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "coeff_stage",
                     {
-                        "stage 1": Bin(0),
-                        "stage 2": Bin(1),
+                        "stage 1": Bin(0, registerLen=1),
+                        "stage 2": Bin(1, registerLen=1),
                     },
                     description="Selects which stage of the filter to write.",
                 ),
@@ -949,7 +949,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(0, 23, registerID="all"),
                 self.mnemonicFN(
                     "prog_coeff_data",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=24, mode="signed"), "out": lambda x: int(x)},
                     description="A 24bit signed filter coefficient that will be \
                                  written to the address defined in prog_coeff_addr.",
                 ),
@@ -960,8 +960,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "prog_en",
                     {
-                        "Built-in filter selected by filter_shape": Bin(0),
-                        "Coefficients programmed via prog_coeff_data": Bin(1),
+                        "Built-in filter selected by filter_shape": Bin(0, registerLen=1),
+                        "Coefficients programmed via prog_coeff_data": Bin(1, registerLen=1),
                     },
                     description="Enables the custom oversampling filter coefficients.",
                 ),
@@ -971,8 +971,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "prog_we",
                     {
-                        "Disables write signal to the coefficient RAM": Bin(0),
-                        "Enables write signal to the coefficient RAM": Bin(1),
+                        "Disables write signal to the coefficient RAM": Bin(0, registerLen=1),
+                        "Enables write signal to the coefficient RAM": Bin(1, registerLen=1),
                     },
                     description="Enables writing to the programmable coefficient RAM.",
                 ),
@@ -982,8 +982,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "stage2_even",
                     {
-                        "Sine symmetric filter (27 coeff.)": Bin(0),
-                        "Cosine symmetric filter (28 coeff.)": Bin(1),
+                        "Sine symmetric filter (27 coeff.)": Bin(0, registerLen=1),
+                        "Cosine symmetric filter (28 coeff.)": Bin(1, registerLen=1),
                     },
                     description="Selects the symmetry of the stage 2 oversampling filter.",
                 ),
@@ -991,7 +991,7 @@ class DAC_9038Q2M_Control(I2CMapper):
             .addMnemonic(
                 self.registerRange(3, 7, registerID=44),
                 self.mnemonicMapper(
-                    "reserved", {}, description="Not connected in the digital core."
+                    "reserved", {"Reserved": Bin(0, registerLen=5)}, description="Not connected in the digital core."
                 ),
             ),
             self.register(45, name="Low Power and Auto Calibration")
@@ -999,19 +999,19 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerRange(0, 0, registerID=45),
                 self.mnemonicMapper(
                     "bias_ctr",
-                    {"Off": Bin(0), "On": Bin(1)},
+                    {"Off": Bin(0, registerLen=1), "On": Bin(1, registerLen=1)},
                     description="Sets the state of the BIAS pin.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(1, 3, registerID=45),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=3)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(4, 4, registerID=45),
                 self.mnemonicMapper(
                     "calib_latch",
-                    {"No update": Bin(0), "Continue routine update": Bin(1)},
+                    {"No update": Bin(0, registerLen=1), "Continue routine update": Bin(1, registerLen=1)},
                     description="Continues updating the calibration routine while set to 1’b1.",
                 ),
             )
@@ -1019,44 +1019,44 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerRange(5, 5, registerID=45),
                 self.mnemonicMapper(
                     "calib_en",
-                    {"Disable": Bin(0), "Enable": Bin(1)},
+                    {"Disable": Bin(0, registerLen=1), "Enable": Bin(1, registerLen=1)},
                     description="Enables master trim calibration via the ADC input.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(6, 7, registerID=45),
-                self.mnemonicMapper("reserved", {}, description="reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=2)}, description="reserved"),
             ),
             self.register(46, name="ADC Configuration")
             .addMnemonic(
                 self.registerRange(0, 0, registerID=46),
                 self.mnemonicMapper(
                     "adc_pdb",
-                    {"Shuts down ADC": Bin(0), "Enables ADC": Bin(1)},
+                    {"Shuts down ADC": Bin(0, registerLen=1), "Enables ADC": Bin(1, registerLen=1)},
                     description="Shuts down the ADC. Note: GPIO must be configured as ADC input for the ADC to function correctly.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(1, 1, registerID=46),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(2, 2, registerID=46),
                 self.mnemonicMapper(
                     "adc_ditherb",
-                    {"TPDF shaped dither": Bin(0), "Disabled dither": Bin(1)},
+                    {"TPDF shaped dither": Bin(0, registerLen=1), "Disabled dither": Bin(1, registerLen=1)},
                     description="Allows the ADC dither to be disabled on a per ADC basis.",
                 ),
             )
             .addMnemonic(
                 self.registerRange(3, 3, registerID=46),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerRange(4, 5, registerID=46),
                 self.mnemonicMapper(
                     "adc_clk",
-                    {"CLK": Bin(0), "CLK/2": Bin(1), "CLK/4": Bin(2), "CLK/8": Bin(3)},
+                    {"CLK": Bin(0, registerLen=2), "CLK/2": Bin(1, registerLen=2), "CLK/4": Bin(2, registerLen=2), "CLK/8": Bin(3, registerLen=2)},
                     description="Sets the clock dividing ration for the ADC analog section.\
                                               This also affects the decimation filter stages. ADC_CLK  = *",
                 ),
@@ -1066,8 +1066,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "adc_order",
                     {
-                        "Uses first order modulation": Bin(0),
-                        "Uses second order modulation": Bin(1),
+                        "Uses first order modulation": Bin(0, registerLen=1),
+                        "Uses second order modulation": Bin(1, registerLen=1),
                     },
                     description="Selects whether the ADC uses a first order modulator or a \
                                               second order modulator in the analog section.",
@@ -1075,14 +1075,14 @@ class DAC_9038Q2M_Control(I2CMapper):
             )
             .addMnemonic(
                 self.registerRange(7, 7, registerID=46),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=1)}, description="Reserved"),
             ),
             self.register((47, 48, 49, 50, 51, 52), name="ADC Filter Configuration")
             .addMnemonic(
                 self.registerMultiRange(0, 15, registerID="all"),
                 self.mnemonicFN(
                     "adc_ftr_scale",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=16), "out": lambda x: int(x)},
                     description="The Sabre contains two decimation filters for filtering the ADC data. \
                                               These filters are configurable via the ADC filter configuration registers. \
                                               They are set as a low pass filter by default.",
@@ -1092,7 +1092,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(16, 31, registerID="all"),
                 self.mnemonicFN(
                     "adc_fbq_scale1",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=16), "out": lambda x: int(x)},
                     description="The Sabre contains two decimation filters for filtering the ADC data. \
                                               These filters are configurable via the ADC filter configuration registers. \
                                               They are set as a low pass filter by default.",
@@ -1102,20 +1102,20 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerMultiRange(32, 47, registerID="all"),
                 self.mnemonicFN(
                     "adc_fbq_scale2",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=16), "out": lambda x: int(x)},
                     description="The Sabre contains two decimation filters for filtering the ADC data. \
                                               These filters are configurable via the ADC filter configuration registers. \
                                               They are set as a low pass filter by default.",
                 ),
             ),
-            self.register((53, 54), name="Reserved")
+            self.register((53, 54), name="Reserved 53/54")
             .addMnemonic(
                 self.registerMultiRange(0, 11, registerID="all"),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=12)}, description="Reserved"),
             )
             .addMnemonic(
                 self.registerMultiRange(12, 15, registerID="all"),
-                self.mnemonicMapper("reserved", {}, description="Reserved"),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=4)}, description="Reserved"),
             ),
             self.register(64, name="Chip ID and Status", writeable=False)
             .addMnemonic(
@@ -1123,8 +1123,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "lock_status",
                     {
-                        "DPLL not locked": Bin(0),
-                        "DPLL locked": Bin(1),
+                        "DPLL not locked": Bin(0, registerLen=1),
+                        "DPLL locked": Bin(1, registerLen=1),
                     },
                     description="Indicator for when the DPLL is locked (when in slave mode) or 1’b1 \
                                               when the Sabre is the master.",
@@ -1135,8 +1135,8 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicMapper(
                     "automute_status",
                     {
-                        "Automute inactive": Bin(0),
-                        "Automute active": Bin(1),
+                        "Automute inactive": Bin(0, registerLen=1),
+                        "Automute active": Bin(1, registerLen=1),
                     },
                     description="Indicator for when automute has become active.",
                 ),
@@ -1145,7 +1145,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.registerRange(2, 7, registerID=64),
                 self.mnemonicFN(
                     "chip_id",
-                    {"in": lambda x: Bin(int(x)), "out": lambda x: int(x)},
+                    {"in": lambda x: Bin(int(x), registerLen=2*8), "out": lambda x: int(x)},
                     description="Determines the chip identification.",
                 ),
             ),
@@ -1155,7 +1155,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "gpio1",
                     {
-                        "in": lambda x: Bin(int(x)),
+                        "in": lambda x: Bin(int(x), registerLen=1),
                         "out": lambda x: int(x),
                     },
                     description="Contains the state of the GPIO1 pin.",
@@ -1166,7 +1166,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "gpio2",
                     {
-                        "in": lambda x: Bin(int(x)),
+                        "in": lambda x: Bin(int(x), registerLen=1),
                         "out": lambda x: int(x),
                     },
                     description="Contains the state of the GPIO2 pin.",
@@ -1174,7 +1174,7 @@ class DAC_9038Q2M_Control(I2CMapper):
             )
             .addMnemonic(
                 self.registerRange(2, 7, registerID=65),
-                self.mnemonicMapper("reserved", {}, description="Reserved."),
+                self.mnemonicMapper("reserved", {"Reserved": Bin(0, registerLen=6)}, description="Reserved."),
             ),
             self.register(
                 (66, 67, 68, 69), name="DPLL Number", writeable=False
@@ -1183,7 +1183,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "dpll_num",
                     {
-                        "in": lambda x: Bin(int(x * 2 ** 32 / MCLK)),
+                        "in": lambda x: Bin(int(x * 2 ** 32 / MCLK), registerLen=32),
                         "out": lambda x: int(x) * MCLK / 2 ** 32,
                     },
                     description="Contains the ratio between the MCLK and the audio clock rate once the \
@@ -1202,7 +1202,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.mnemonicFN(
                     "spdif_status",
                     {
-                        "in": lambda x: Bin(int(x)),
+                        "in": lambda x: Bin(int(x), registerLen=8*(94-70)),
                         "out": lambda x: int(x),
                     },
                     description="Contains either the SPDIF channel status (table shown below) or the \
@@ -1218,7 +1218,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 # Returned value is a list of 16 bytes
                 register.fillData(
                     {
-                        r: bus.read_byte_data(self.i2cAddr, r)
+                        r: Bin(bus.read_byte_data(self.i2cAddr, r), registerLen=8, mode="unsigned")
                         for r in register.registers
                     }
                 )
@@ -1228,7 +1228,7 @@ class DAC_9038Q2M_Control(I2CMapper):
     def fir_update(self, data, filter="fir1"):
         if filter == "fir1":
             assert(len(data) == 128)
-            self.get("Programmable FIR Configuration").prog_we = 1
+            self.get("Programmable FIR Configuration").prog_we = "Enables write signal to the coefficient RAM"
             self.i2c_update()
             self.get("Programmable FIR RAM Address").coeff_stage = "stage one"
             self.i2c_update()
@@ -1237,11 +1237,12 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.i2c_update()
                 self.get("Programmable FIR RAM Data").prog_coeff_data = d
                 self.i2c_update()
-            self.get("Programmable FIR Configuration").prog_we = 0
+
+            self.get("Programmable FIR Configuration").prog_we = "Disables write signal to the coefficient RAM"
             self.i2c_update()
         elif filter == "fir2":
             assert(len(data) == 28 or len(data) == 14)
-            self.get("Programmable FIR Configuration").prog_we = 1
+            self.get("Programmable FIR Configuration").prog_we = "Enables write signal to the coefficient RAM"
             self.i2c_update()
             self.get("Programmable FIR RAM Address").coeff_stage = "stage two"
             self.i2c_update()
@@ -1250,14 +1251,14 @@ class DAC_9038Q2M_Control(I2CMapper):
                 self.i2c_update()
                 self.get("Programmable FIR RAM Data").prog_coeff_data = d
                 self.i2c_update()
-            self.get("Programmable FIR Configuration").prog_we = 0
+            self.get("Programmable FIR Configuration").prog_we = "Disables write signal to the coefficient RAM"
             self.i2c_update()
     def i2c_update(self):
         with SMBus(bus=1, force=True) as bus:
             for register in self.registers:
                 for n, v in register.getNewData().items():
                     print(f"{n}: {v}")
-                    bus.write_byte_data(self.i2cAddr, n, v)
+                    bus.write_byte_data(self.i2cAddr, n, v.value.uint)
 
     def data_init(self, path):
         data = pickle.load(open(path, "rb"))
