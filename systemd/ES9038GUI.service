@@ -6,8 +6,8 @@ After=network.target syslog.target
 [Service]
 # see man systemd.service 
 Type=simple
-ExecStart=/usr/bin/python3 /home/pi/config/DAC/Control/web_gui.py
-ExecStop=ps -ef | grep 'Control/web_gui.py' | grep -v grep | awk '{print $2}' | xargs -r kill -9
+ExecStart=/usr/bin/python3 /root/config/dac/control/web_gui.py
+ExecStop=ps -ef | grep 'control/web_gui.py' | grep -v grep | awk '{print $2}' | xargs -r kill -9
 StandardOutput=journal
 
 [Install]

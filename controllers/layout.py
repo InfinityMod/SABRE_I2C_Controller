@@ -147,6 +147,13 @@ class Bin(object):
 
         self.applyData(subscript.start, subscript.start+value.length, value)
 
+    def copy(self):
+        return Bin(self.value,
+            mode=self.mode,
+            registerLen=self.registerLen,
+            joinDirection=self.joinDirection,
+            idxBegin=self.idxBegin)
+
 class I2CMapper:
     def __init__(self):
         self.registers = []
@@ -180,7 +187,7 @@ class I2CMapper:
             if isinstance(value, Bin):
                 self._value.applyData(0, len(value), value)
             elif value in self.mapping:
-                self._value = self.mapping[value]
+                self._value = self.mapping[value].copy()
 
     class mnemonicFN:
         def __init__(self, name: str, mapping: dict, description: str = ""):

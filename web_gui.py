@@ -254,7 +254,8 @@ class ControlApp(app.PyComponent):
     @flx.reaction('widget.file_loaded')
     def handle_file_upload(self, *events):
         filedata = events[-1]['filedata']
-        data = [min(2**23-1, (max(-2**23, int(float(f.replace("\r", ""))))*2**23)) for f in filedata.split("\n") if len(f) > 0]
+        data = [min(2**23-1, (max(-2**23, int(float(f.replace("\r", ""))*2**23)))) for f in filedata.split("\n") if len(f) > 0]
+        print("Start Fir Update: {}".format(self.fir_filter))
         for m in self.mappers:
             m.fir_update(data, filter=self.fir_filter)
 
@@ -311,7 +312,6 @@ class ControlApp(app.PyComponent):
                         self.currentSelect[1],
                         int(data[0]["new_value"]),
                     )
-
     @event.action
     def update_i2c(self):
         for m in self.mappers:

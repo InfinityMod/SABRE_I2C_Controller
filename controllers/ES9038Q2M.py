@@ -1230,35 +1230,86 @@ class DAC_9038Q2M_Control(I2CMapper):
             assert(len(data) == 128)
             self.get("Programmable FIR Configuration").prog_we = "Enables write signal to the coefficient RAM"
             self.i2c_update()
-            self.get("Programmable FIR RAM Address").coeff_stage = "stage one"
+            
+            self.get("Programmable FIR RAM Address").coeff_stage = "stage 1"
             self.i2c_update()
+
             for i, d in enumerate(data):
                 self.get("Programmable FIR RAM Address").coeff_addr = i
                 self.i2c_update()
                 self.get("Programmable FIR RAM Data").prog_coeff_data = d
                 self.i2c_update()
-
+                
             self.get("Programmable FIR Configuration").prog_we = "Disables write signal to the coefficient RAM"
             self.i2c_update()
         elif filter == "fir2":
-            assert(len(data) == 28 or len(data) == 14)
+            assert(len(data) in [27, 28])
             self.get("Programmable FIR Configuration").prog_we = "Enables write signal to the coefficient RAM"
             self.i2c_update()
-            self.get("Programmable FIR RAM Address").coeff_stage = "stage two"
+
+            self.get("Programmable FIR RAM Address").coeff_stage = "stage 2"
             self.i2c_update()
-            for i, d in enumerate(data[:14]):
+            if len(data) == 27:
+                self.get("Programmable FIR Configuration").stage2_even = "Sine symmetric filter (27 coeff.)"
+            elif len(data) == 28:
+                self.get("Programmable FIR Configuration").stage2_even = "Cosine symmetric filter (28 coeff.)"
+            self.i2c_update()
+
+            for i, d in enumerate(data[0:14]):
                 self.get("Programmable FIR RAM Address").coeff_addr = i
                 self.i2c_update()
                 self.get("Programmable FIR RAM Data").prog_coeff_data = d
                 self.i2c_update()
+            for i in [14, 15]:
+                self.get("Programmable FIR RAM Address").coeff_addr = i
+                self.i2c_update()
+                self.get("Programmable FIR RAM Data").prog_coeff_data = 0
+                self.i2c_update()
+
             self.get("Programmable FIR Configuration").prog_we = "Disables write signal to the coefficient RAM"
             self.i2c_update()
+    
+    def fir_get(self, filter="fir1"):
+        data = []
+        if filter == "fir1":   
+            self.get("Programmable FIR RAM Address").coeff_stage = "stage one"
+            self.i2c_update()
+            
+            for i in range(128):
+                self.get("Programmable FIR RAM Address").coeff_addr = i
+                self.i2c_update()
+                self.i2c_get(self.get("Programmable FIR RAM Data").registers)
+                data.append(self.get("Programmable FIR RAM Data").prog_coeff_data)
+
+        if filter == "fir2":   
+            self.get("Programmable FIR RAM Address").coeff_stage = "stage two"
+            self.i2c_update()
+            
+            for i in range(14):
+                self.get("Programmable FIR RAM Address").coeff_addr = i
+                self.i2c_update()
+                self.i2c_get(self.get("Programmable FIR RAM Data").registers)
+                data.append(self.get("Programmable FIR RAM Data").prog_coeff_data)
+            data = data + data[::-1]
+        return data
+
     def i2c_update(self):
         with SMBus(bus=1, force=True) as bus:
             for register in self.registers:
                 for n, v in register.getNewData().items():
                     print(f"{n}: {v}")
                     bus.write_byte_data(self.i2cAddr, n, v.value.uint)
+
+    def i2c_get(self, idxs):
+        with SMBus(bus=1, force=True) as bus:
+            for register in self.registers:
+                if any([idx in register.registers for idx in idxs]):
+                    data = {
+                            r: Bin(bus.read_byte_data(self.i2cAddr, r), registerLen=8, mode="unsigned")
+                            for r in register.registers
+                    }
+                    register.fillData(data)
+                    print([d.bin for d in data.values()])
 
     def data_init(self, path):
         data = pickle.load(open(path, "rb"))
