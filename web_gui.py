@@ -317,11 +317,29 @@ class ControlApp(app.PyComponent):
         for m in self.mappers:
             m.i2c_update()
 
+def import_defaults(path, mapper):
+    print("Import defaults")
+    config_file = os.path.join(path, "ES9038Q2M_{0}.yaml".format(hex(mapper.i2cAddr)))
+    fir1_file = os.path.join(path, "FIR1.txt")
+    fir2_file = os.path.join(path, "FIR2.txt")
+
+    if os.path.isfile(config_file):
+        print("Apply config" + "ES9038Q2M_{0}.yaml".format(hex(mapper.i2cAddr)))
+        mapper.importYaml(config_file)
+    if all([os.path.isfile(f) for f in [fir1_file, fir2_file]]):
+        for fir in [(fir2_file, "fir2"), (fir1_file, "fir1")]:
+            with open(fir[0], "r") as fil:
+                filedata = fil.read()
+            data = [min(2**23-1, (max(-2**23, int(float(f.replace("\r", ""))*2**23)))) for f in filedata.split("\n") if len(f) > 0]
+            mapper.fir_update(data, fir[1])
+
 if __name__ == "__main__":
     lock_settings = [("Mixing, Serial Data and Automute Configuration", "*")]
     mappers = [DAC_9038Q2M_Control(0x48), DAC_9038Q2M_Control(0x49)]
+    defaults = os.path.join(os.path.dirname(__file__), "configs",  "default")
     for m in mappers:
         m.i2c_init()
+        import_defaults(defaults, m)
         # m.importYaml(
         #     r"C:\Users\webco\Documents\Projects\SABRE_I2C_Controller\configs\device_0x48_config_std.yml"
         # )

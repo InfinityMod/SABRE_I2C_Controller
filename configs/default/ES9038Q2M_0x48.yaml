@@ -1,0 +1,885 @@
+date: 20/02/2021 22:28:02
+device: 9038Q2M
+i2cAddr: 72
+reg_0:
+  mnemonics:
+    clk_gear:
+      possible_values:
+      - XI
+      - XI / 2
+      - XI / 4
+      - XI / 8
+      value: XI
+    osc_drv:
+      possible_values:
+      - full bias
+      - 3/4 bias
+      - 1/2 bias
+      - 1/4 bias
+      - shutdown oscillator
+      value: full bias
+    soft_reset:
+      possible_values:
+      - normal operation
+      - reset to power-on defaults
+      value: normal operation
+  name: System Registers
+  rawData:
+    0: '00000000'
+  registerLen: 8
+  writeable: true
+reg_1:
+  mnemonics:
+    auto_select:
+      possible_values:
+      - disable auto-select
+      - DSD or Serial
+      - SPDIF or Serial
+      - DSD, SPDIF or Serial
+      value: DSD, SPDIF or Serial
+    input_select:
+      possible_values:
+      - serial
+      - SPDIF
+      - Reserved
+      - DSD
+      value: serial
+    serial_length:
+      possible_values:
+      - 16 bits
+      - 24 bits
+      - 32 bits
+      - 32 bits2
+      value: 32 bits
+    serial_mode:
+      possible_values:
+      - I2S Mode
+      - left-justified mode
+      - right-justified mode
+      - right-justified mode2
+      value: I2S Mode
+  name: Input selection
+  rawData:
+    1: '10001100'
+  registerLen: 8
+  writeable: true
+reg_10:
+  mnemonics:
+    128fs_mode (128*FSR mode):
+      possible_values:
+      - enables MCLK
+      - disables MCLK
+      value: enables MCLK
+    lock_speed:
+      possible_values:
+      - 16384 FSL
+      - 8192 FSL
+      - 5461 FSL
+      - 4096 FSL
+      - 3276 FSL
+      - 2730 FSL
+      - 2340 FSL
+      - 2048 FSL
+      - 1820 FSL
+      - 1638 FSL
+      - 1489 FSL
+      - 1365 FSL
+      - 1260 FSL
+      - 1170 FSL
+      - 1092 FSL
+      - 1024 FSL
+      value: 5461 FSL
+    master_div:
+      possible_values:
+      - MCLK/2
+      - MCLK/4
+      - MCLK/8
+      - MCLK/16
+      value: MCLK/2
+    master_mode:
+      possible_values:
+      - disable
+      - enable
+      value: disable
+  name: Master Mode and Sync Configuration
+  rawData:
+    10: '00010010'
+  registerLen: 8
+  writeable: true
+reg_11:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+    spdif_sel:
+      possible_values:
+      - DATA_CLK
+      - DATA1
+      - DATA2
+      - GPIO1
+      - GPIO2
+      value: GPIO1
+  name: SPDIF Select
+  rawData:
+    11: '00110000'
+  registerLen: 8
+  writeable: true
+reg_12:
+  mnemonics:
+    dpll_bw_dsd:
+      possible_values:
+      - DPLL Off
+      - Lowerst Bandwidth
+      - Bandwith Mode 2
+      - Bandwith Mode 3
+      - Bandwith Mode 4
+      - Bandwith Mode 5
+      - Bandwith Mode 6
+      - Bandwith Mode 7
+      - Bandwith Mode 8
+      - Bandwith Mode 9
+      - Bandwith Mode 10
+      - Bandwith Mode 11
+      - Bandwith Mode 12
+      - Bandwith Mode 13
+      - Bandwith Mode 14
+      - Highest Bandwidth
+      value: DPLL Off
+    dpll_bw_serial:
+      possible_values:
+      - DPLL Off
+      - Lowerst Bandwidth
+      - Bandwith Mode 2
+      - Bandwith Mode 3
+      - Bandwith Mode 4
+      - Bandwith Mode 5
+      - Bandwith Mode 6
+      - Bandwith Mode 7
+      - Bandwith Mode 8
+      - Bandwith Mode 9
+      - Bandwith Mode 10
+      - Bandwith Mode 11
+      - Bandwith Mode 12
+      - Bandwith Mode 13
+      - Bandwith Mode 14
+      - Highest Bandwidth
+      value: DPLL Off
+  name: ASRC/DPLL Bandwidth
+  rawData:
+    12: '00000000'
+  registerLen: 8
+  writeable: true
+reg_13:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+    thd_enb:
+      possible_values:
+      - enable THD
+      - disable THD
+      value: enable THD
+  name: THD Bypass
+  rawData:
+    13: '01000000'
+  registerLen: 8
+  writeable: true
+reg_14:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+    soft start time:
+      possible_values: []
+      value: 8388608.0
+    soft_start_on_lock:
+      possible_values:
+      - Always soft start
+      - Soft start when locked
+      value: Soft start when locked
+  name: Soft Start Configuration
+  rawData:
+    14: '01001010'
+  registerLen: 8
+  writeable: true
+reg_15_16:
+  mnemonics:
+    volume1:
+      possible_values: []
+      value: -17.0
+    volume2:
+      possible_values: []
+      value: -17.0
+  name: Volume Control
+  rawData:
+    15: '00010100'
+    16: '00010100'
+  registerLen: 8
+  writeable: true
+reg_17_18_19_20:
+  mnemonics:
+    master_trim:
+      possible_values: []
+      value: -1073741823.5
+  name: Master Trim
+  rawData:
+    17: '11111111'
+    18: '11111111'
+    19: '11111111'
+    20: '01111111'
+  registerLen: 8
+  writeable: true
+reg_2:
+  mnemonics:
+    automute:
+      possible_values:
+      - normal operation
+      - perform mute
+      - ramp2ground
+      - perform mute/ramp2ground
+      value: normal operation
+    ch1_mix_sel:
+      possible_values:
+      - ch1
+      - ch2
+      - Reserved
+      value: ch1
+    ch2_mix_sel:
+      possible_values:
+      - ch1
+      - ch2
+      - Reserved
+      - Reservedl
+      value: ch1
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Mixing, Serial Data and Automute Configuration
+  rawData:
+    2: '00110000'
+  registerLen: 8
+  writeable: true
+reg_21:
+  mnemonics:
+    gpio_sel1:
+      possible_values:
+      - serial data (I2S/LJ)
+      - SPDIF
+      - Reserved
+      - DSD data
+      value: SPDIF
+    gpio_sel2:
+      possible_values:
+      - serial data (I2S/LJ)
+      - SPDIF
+      - Reserved
+      - DSD data
+      value: SPDIF
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: GPIO Input Selection
+  rawData:
+    21: '01010000'
+  registerLen: 8
+  writeable: true
+reg_22_23:
+  mnemonics:
+    thd_comp_c2:
+      possible_values: []
+      value: 0
+  name: THD Compensation C2
+  rawData:
+    22: '00000000'
+    23: '00000000'
+  registerLen: 8
+  writeable: true
+reg_24_25:
+  mnemonics:
+    thd_comp_c3:
+      possible_values: []
+      value: 0
+  name: THD Compensation C3
+  rawData:
+    24: '00000000'
+    25: '00000000'
+  registerLen: 8
+  writeable: true
+reg_26:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Reserved 26
+  rawData:
+    26: '01100010'
+  registerLen: 8
+  writeable: true
+reg_27:
+  mnemonics:
+    18db_gain:
+      possible_values:
+      - No gain on either channels
+      - Normal gain on channel 2, +18dB gain on channel 1
+      - +18dB gain on channel 2, normal gain on channel 1
+      - +18dB gain on both channel 2 and channel 1
+      value: No gain on either channels
+    asrc_en:
+      possible_values:
+      - Disabled
+      - Enabled
+      value: Enabled
+    ch1_volume:
+      possible_values:
+      - Allow independent control
+      - Use the ch1 volume for ch1/2
+      value: Allow independent control
+    latch_volume:
+      possible_values:
+      - Disables updates
+      - Syncronize to volume registers
+      value: Syncronize to volume registers
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: General Configuration
+  rawData:
+    27: '11010100'
+  registerLen: 8
+  writeable: true
+reg_28:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Reserved 28
+  rawData:
+    28: '11110000'
+  registerLen: 8
+  writeable: true
+reg_29:
+  mnemonics:
+    invert_gpio:
+      possible_values:
+      - Normal
+      - Invert GPIO1
+      - Invert GPIO2
+      - Invert GPIO1/2
+      value: Normal
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: GPIO Configuration
+  rawData:
+    29: '00000000'
+  registerLen: 8
+  writeable: true
+reg_3:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+    spdif_ig_data:
+      possible_values:
+      - ignore dataflage
+      - mute on dataflag
+      value: mute on dataflag
+    spdif_ig_valid:
+      possible_values:
+      - ignore validflag
+      - mute on invalid
+      value: mute on invalid
+    spdif_user_bits:
+      possible_values:
+      - SPDIF user bits
+      - SPDIF channel status bits
+      value: SPDIF channel status bits
+  name: SPDIF Configuration
+  rawData:
+    3: '01000000'
+  registerLen: 8
+  writeable: true
+reg_30_31:
+  mnemonics:
+    cp_clk_div:
+      possible_values: []
+      value: 0
+    cp_clk_en:
+      possible_values:
+      - Tristate output
+      - Tied to GND
+      - Tied to DVDD
+      - Active
+      value: Tristate output
+    cp_clk_sel:
+      possible_values:
+      - f_CLK=XI
+      - Reserved
+      value: f_CLK=XI
+  name: Charge Pump Clock
+  rawData:
+    30: '00000000'
+    31: '00000000'
+  registerLen: 8
+  writeable: true
+reg_32:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Reserved 32
+  rawData:
+    32: '00000000'
+  registerLen: 8
+  writeable: true
+reg_33:
+  mnemonics:
+    automute_mask:
+      possible_values:
+      - 0_mask
+      - 1_mask
+      value: 0_mask
+    lock_mask:
+      possible_values:
+      - 0_mask
+      - 1_mask
+      value: 0_mask
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Interrupt Mask
+  rawData:
+    33: '00000000'
+  registerLen: 8
+  writeable: true
+reg_34_35_36_37:
+  mnemonics:
+    nco_num:
+      possible_values: []
+      value: 0.0
+  name: Programmable NCO
+  rawData:
+    34: '00000000'
+    35: '00000000'
+    36: '00000000'
+    37: '00000000'
+  registerLen: 8
+  writeable: true
+reg_38:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Reserved 38
+  rawData:
+    38: '00000000'
+  registerLen: 8
+  writeable: true
+reg_39:
+  mnemonics:
+    amp_pdb:
+      possible_values:
+      - Disabled
+      - Enabled
+      value: Disabled
+    amp_pdb_ss:
+      possible_values:
+      - Amplifier controlled by amp_pdb
+      - Shut amp down when DAC to ground
+      value: Amplifier controlled by amp_pdb
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+    sw_ctrl_en:
+      possible_values:
+      - Switch external controlled
+      - Switch control is set to 0
+      - Reserved
+      - Switch control is set to 1
+      value: Switch external controlled
+  name: General Configuration 2
+  rawData:
+    39: '00100000'
+  registerLen: 8
+  writeable: true
+reg_4:
+  mnemonics:
+    automute_time:
+      possible_values: []
+      value: 0
+  name: Automute Time
+  rawData:
+    4: '00000000'
+  registerLen: 8
+  writeable: true
+reg_40:
+  mnemonics:
+    coeff_addr:
+      possible_values: []
+      value: 127
+    coeff_stage:
+      possible_values:
+      - stage 1
+      - stage 2
+      value: stage 1
+  name: Programmable FIR RAM Address
+  rawData:
+    40: '01111111'
+  registerLen: 8
+  writeable: true
+reg_41_42_43:
+  mnemonics:
+    prog_coeff_data:
+      possible_values: []
+      value: 0
+  name: Programmable FIR RAM Data
+  rawData:
+    41: '00000000'
+    42: '00000000'
+    43: '00000000'
+  registerLen: 8
+  writeable: true
+reg_44:
+  mnemonics:
+    prog_en:
+      possible_values:
+      - Built-in filter selected by filter_shape
+      - Coefficients programmed via prog_coeff_data
+      value: Coefficients programmed via prog_coeff_data
+    prog_we:
+      possible_values:
+      - Disables write signal to the coefficient RAM
+      - Enables write signal to the coefficient RAM
+      value: Disables write signal to the coefficient RAM
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+    stage2_even:
+      possible_values:
+      - Sine symmetric filter (27 coeff.)
+      - Cosine symmetric filter (28 coeff.)
+      value: Cosine symmetric filter (28 coeff.)
+  name: Programmable FIR Configuration
+  rawData:
+    44: '00000101'
+  registerLen: 8
+  writeable: true
+reg_45:
+  mnemonics:
+    bias_ctr:
+      possible_values:
+      - 'Off'
+      - 'On'
+      value: 'Off'
+    calib_en:
+      possible_values:
+      - Disable
+      - Enable
+      value: Disable
+    calib_latch:
+      possible_values:
+      - No update
+      - Continue routine update
+      value: No update
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Low Power and Auto Calibration
+  rawData:
+    45: '00000100'
+  registerLen: 8
+  writeable: true
+reg_46:
+  mnemonics:
+    adc_clk:
+      possible_values:
+      - CLK
+      - CLK/2
+      - CLK/4
+      - CLK/8
+      value: CLK
+    adc_ditherb:
+      possible_values:
+      - TPDF shaped dither
+      - Disabled dither
+      value: Disabled dither
+    adc_order:
+      possible_values:
+      - Uses first order modulation
+      - Uses second order modulation
+      value: Uses first order modulation
+    adc_pdb:
+      possible_values:
+      - Shuts down ADC
+      - Enables ADC
+      value: Shuts down ADC
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: ADC Configuration
+  rawData:
+    46: '00000100'
+  registerLen: 8
+  writeable: true
+reg_47_48_49_50_51_52:
+  mnemonics:
+    adc_fbq_scale1:
+      possible_values: []
+      value: 1024
+    adc_fbq_scale2:
+      possible_values: []
+      value: 1024
+    adc_ftr_scale:
+      possible_values: []
+      value: 992
+  name: ADC Filter Configuration
+  rawData:
+    47: '11100000'
+    48: '00000011'
+    49: '00000000'
+    50: '00000100'
+    51: '00000000'
+    52: '00000100'
+  registerLen: 8
+  writeable: true
+reg_5:
+  mnemonics:
+    automute_level:
+      possible_values: []
+      value: -104
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Automute Level
+  rawData:
+    5: '01101000'
+  registerLen: 8
+  writeable: true
+reg_53_54:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Reserved 53/54
+  rawData:
+    53: '00011010'
+    54: '00001111'
+  registerLen: 8
+  writeable: true
+reg_6:
+  mnemonics:
+    auto_deemph:
+      possible_values:
+      - disable
+      - enable
+      value: disable
+    deemph_bypass:
+      possible_values:
+      - disable
+      - enable
+      value: disable
+    deemph_sel:
+      possible_values:
+      - Reserved
+      - 48kHz
+      - 44.1kHz
+      - 32kHz
+      value: 44.1kHz
+    dop_enable:
+      possible_values:
+      - enabled
+      - disabled
+      value: enabled
+    volume_rate:
+      possible_values: []
+      value: 1.0
+  name: De-emphasis, DoP and Volume Ramp Rate
+  rawData:
+    6: '11011010'
+  registerLen: 8
+  writeable: true
+reg_64:
+  mnemonics:
+    automute_status:
+      possible_values:
+      - Automute inactive
+      - Automute active
+      value: Automute inactive
+    chip_id:
+      possible_values: []
+      value: 28
+    lock_status:
+      possible_values:
+      - DPLL not locked
+      - DPLL locked
+      value: DPLL locked
+  name: Chip ID and Status
+  rawData:
+    64: '01110001'
+  registerLen: 8
+  writeable: false
+reg_65:
+  mnemonics:
+    gpio1:
+      possible_values: []
+      value: 1
+    gpio2:
+      possible_values: []
+      value: 1
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: GPIO Readback
+  rawData:
+    65: '00000011'
+  registerLen: 8
+  writeable: false
+reg_66_67_68_69:
+  mnemonics:
+    dpll_num:
+      possible_values: []
+      value: 0.0039062462747097015
+  name: DPLL Number
+  rawData:
+    66: '11110000'
+    67: '11111111'
+    68: '11111111'
+    69: '00000000'
+  registerLen: 8
+  writeable: false
+reg_7:
+  mnemonics:
+    bypass_osf:
+      possible_values:
+      - built-in oversampling
+      - external oversampling
+      value: built-in oversampling
+    filter_shape:
+      possible_values:
+      - brick_wall
+      - corrected minimum phase fast roll-off
+      - Reserved
+      - apodizing fast roll-off filter
+      - minimum phase slow roll-off filter
+      - minimum phase fast roll-off filter
+      - linear phase slow roll-off filter
+      - linear phase fast roll-off filter
+      value: apodizing fast roll-off filter
+    mute:
+      possible_values:
+      - mute both channels
+      - normal operation
+      value: normal operation
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Filter Bandwidth and System Mute
+  rawData:
+    7: '10000000'
+  registerLen: 8
+  writeable: true
+reg_70_71_72_73_74_75_76_77_78_79_80_81_82_83_84_85_86_87_88_89_90_91_92_93:
+  mnemonics:
+    spdif_status:
+      possible_values: []
+      value: 0
+  name: SPDIF Channel Status/User Status
+  rawData:
+    70: '00000000'
+    71: '00000000'
+    72: '00000000'
+    73: '00000000'
+    74: '00000000'
+    75: '00000000'
+    76: '00000000'
+    77: '00000000'
+    78: '00000000'
+    79: '00000000'
+    80: '00000000'
+    81: '00000000'
+    82: '00000000'
+    83: '00000000'
+    84: '00000000'
+    85: '00000000'
+    86: '00000000'
+    87: '00000000'
+    88: '00000000'
+    89: '00000000'
+    90: '00000000'
+    91: '00000000'
+    92: '00000000'
+    93: '00000000'
+  registerLen: 8
+  writeable: false
+reg_8:
+  mnemonics:
+    gpio1_cfg:
+      possible_values:
+      - Automute Status
+      - Lock Status
+      - Volume Min
+      - CLK
+      - Automute/Lock Interrupt
+      - ADC_CLK
+      - Reserved
+      - Output 1'b0
+      - Standard Input
+      - Input Select
+      - Mute All
+      - Soft Start Complete
+      - Output 1'b1
+      value: Input Select
+    gpio2_cfg:
+      possible_values:
+      - Automute Status
+      - Lock Status
+      - Volume Min
+      - CLK
+      - Automute/Lock Interrupt
+      - ADC_CLK
+      - Reserved
+      - Output 1'b0
+      - Standard Input
+      - Input Select
+      - Mute All
+      - ADC.Input
+      - Soft Start Complete
+      - Output 1'b1
+      value: Lock Status
+  name: GPIO1-2 Configuration
+  rawData:
+    8: '00011001'
+  registerLen: 8
+  writeable: true
+reg_9:
+  mnemonics:
+    reserved:
+      possible_values:
+      - Reserved
+      value: Reserved
+  name: Reserved 9
+  rawData:
+    9: '00100010'
+  registerLen: 8
+  writeable: true
