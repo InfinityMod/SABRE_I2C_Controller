@@ -238,14 +238,15 @@ class ControlApp(app.PyComponent):
         self.widget = WebFrontend(self)
         self.autoupdate = False
 
+        mapper = self.mappers[0]
         self.widget.update_tree(
             {
                 "{0}: {1}".format(
-                    ", ".join(map(str, self.mappers[0].get(r).registers)), r
-                ): self.mappers[0]
+                    ", ".join(map(str, mapper.get(r).registers)), r
+                ): mapper
                 .get(r)
                 .mnemonicNames
-                for r in self.mappers[0].registerNames
+                for r in mapper.registerNames
             }
         )
         self.currentSelect = None

@@ -1329,3 +1329,7 @@ class DAC_9038Q2M_Control(I2CMapper):
                 "date": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
             },
         )
+
+    def importYaml(self, path):
+        super().importYaml(path)
+        self.i2c_update()
