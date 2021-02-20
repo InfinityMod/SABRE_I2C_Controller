@@ -334,12 +334,15 @@ def import_defaults(path, mapper):
             mapper.fir_update(data, fir[1])
 
 if __name__ == "__main__":
+    import_defaults_active = False
     lock_settings = [("Mixing, Serial Data and Automute Configuration", "*")]
     mappers = [DAC_9038Q2M_Control(0x48), DAC_9038Q2M_Control(0x49)]
     defaults = os.path.join(os.path.dirname(__file__), "configs",  "default")
+    
     for m in mappers:
         m.i2c_init()
-        import_defaults(defaults, m)
+        if import_defaults_active:
+            import_defaults(defaults, m)
         # m.importYaml(
         #     r"C:\Users\webco\Documents\Projects\SABRE_I2C_Controller\configs\device_0x48_config_std.yml"
         # )
