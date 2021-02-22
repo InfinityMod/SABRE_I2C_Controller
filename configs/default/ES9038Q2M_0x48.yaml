@@ -559,7 +559,7 @@ reg_44:
       possible_values:
       - Built-in filter selected by filter_shape
       - Coefficients programmed via prog_coeff_data
-      value: Coefficients programmed via prog_coeff_data
+      value: Built-in filter selected by filter_shape
     prog_we:
       possible_values:
       - Disables write signal to the coefficient RAM

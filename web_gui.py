@@ -335,7 +335,7 @@ def import_defaults(path, mapper):
             mapper.fir_update(data, fir[1])
 
 if __name__ == "__main__":
-    import_defaults_active = False
+    import_defaults_active = True
     lock_settings = [("Mixing, Serial Data and Automute Configuration", "*")]
     mappers = [DAC_9038Q2M_Control(0x48), DAC_9038Q2M_Control(0x49)]
     defaults = os.path.join(os.path.dirname(__file__), "configs",  "default")
